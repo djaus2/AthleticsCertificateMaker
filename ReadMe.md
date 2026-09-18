@@ -330,15 +330,15 @@ The spreadsheet must contain the following columns.
 | Name | Yes |
 | Email | Yes |
 | Distance | Yes |
-| Time | Yes |
+| Time | No |
 
 Example:
 
 | No | Name | Email | Distance | Time |
 |----|------|--------|----------|------|
-| 1 | Maria Abfalter | example@example.com | DNS | |
+| 1 | Mary Swan | example@example.com | DNS | |
 | 2 | Fred Nurk | example@example.com | 8730 | |
-| 3 | John Smith | example@example.com | 12000 | 1:00:00 |
+| 3 | John Smith | example@example.com | 12000 | 43:00 |
 
 ---
 
