@@ -515,7 +515,7 @@ Then restart Outlook and rerun the script.
 Configured near the top of each script:
 
 ```powershell
-$SendUsingAccount = "onehour@sportronics.com.au"
+$SendUsingAccount = "account@location.com.au""
 ```
 
 This value must match an account configured in Outlook.
