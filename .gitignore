@@ -1,7 +1,7 @@
 /oldGenerateCertificates.ps1
 /~$aResultsentrants-aberfeldie-one-hour-track-challenge.xlsx
 /~$Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx
-/aResultsentrants-aberfeldie-one-hour-track-challenge.xlsx
+!/aResultsentrants-aberfeldie-one-hour-track-challenge.xlsx
 /Results/Aberfeldie-1-Hour-Track-Run-Results-2026.pdf
 /Results/OfficialResults.xlsx
 /.vs
@@ -11,3 +11,5 @@
 !/Output/PNG/
 /Output/PNG/*
 !/Output/PNG/004-Fred.Nurk.png
+ReadMeOld.md
+aResultsentrants-aberfeldie-one-hour-track-challenge.xlsx

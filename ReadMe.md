@@ -2,7 +2,12 @@
 
 > Recently Aberfeldie Masters Athletics ran a 1 Hour Track Run. This project was created to generate certificates for participants and email them with the event results.
 >
-> [Sample certiticate](https://github.com/djaus2/AthsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png)
+> Sample certificate:
+>
+> [004-Fred Nurk.png](https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png)
+
+# Updates
+- As a 1hour event it is assumed that all athletes complete the 1 hour time. Where a time has been added for a participant  `GenerateCertificates.ps1` does not generate a a certicate and does not send anything to those participants but they are inluded in the results along with their time. The script ``GenerateCertificatesTIME.ps1 generates an alternative certificate including their time for those athletes and sends it along with the results; this is only for those with a time.
 
 This project generates:
 
@@ -14,95 +19,158 @@ The workflow is designed for the Aberfeldie Masters Athletics 1 Hour Track Run b
 
 ---
 
-## Draft vs Send (testing vs live)
+# Safe Approach (Recommended)
 
-By default the script saves generated messages to Outlook's Drafts folder for review. Key points:
+When testing changes or running the scripts for the first time, it is strongly recommended that emails are created as Outlook drafts rather than being sent automatically.
 
-- Mail.Save() saves the message to Drafts only (safe for testing).
-- Mail.Send() sends the message immediately using the configured sending account; this is live and will deliver emails.
-- The sending account ($SendUsingAccount) must match an account in Outlook.Session.Accounts or Outlook may fall back to the default account.
-- Sending can trigger profile selection prompts or other Outlook UI depending on your configuration.
-- If you wish to both keep a draft and send automatically you can call Save() then Send(), but verify that behaviour in your Outlook profile first.
+## Configure Draft-Only Behaviour
 
-To switch from draft-only to auto-send, uncomment the `# $Mail.Send()` lines in GenerateCertificates.ps1 (there are two locations where emails are created).
+Comment out any:
 
+```powershell
+$Mail.Send()
+```
+
+and ensure any:
+
+```powershell
+$Mail.Save()
+```
+
+lines are enabled.
+
+Example:
+
+```powershell
+#$Mail.Send()
+
+$Mail.Save()
+```
+
+Result:
+
+- Emails are created in the Outlook Drafts folder.
+- No emails are sent automatically.
+- Each draft can be reviewed individually before sending.
+- Attachments can be verified before delivery.
+- Subject lines and recipients can be checked manually.
+
+This is the safest way to test any script modifications.
+
+---
+
+## Draft vs Send (Testing vs Live)
+
+By default the scripts save generated messages to Outlook's Drafts folder for review.
+
+### Drafts Only
+
+```powershell
+$Mail.Save()
+```
+
+Creates the email in:
+
+```text
+Outlook → Drafts
+```
+
+No email is sent.
+
+### Live Sending
+
+```powershell
+$Mail.Send()
+```
+
+Immediately sends the email using the configured Outlook account.
+
+### Sending Account
+
+The sending account is specified near the top of each script:
+
+```powershell
+$SendUsingAccount = "onehour@sportronics.com.au"
+```
+
+The account must exist in the Outlook profile.
+
+---
 
 # Overview
 
 The process consists of:
 
-1. Preparing the certificate background image
-2. Maintaining the participant spreadsheet
-3. Running `GenerateCertificates.ps1`
-4. Reviewing the generated files
-5. Sending emails via Outlook
+1. Preparing the certificate background image.
+2. Maintaining the participant spreadsheet.
+3. Running the appropriate certificate generation script.
+4. Reviewing generated certificates and email drafts.
+5. Sending approved emails from Outlook.
 
-Output files are created in:
+Two certificate-generation workflows are available:
 
-```text
-Output\
-├── PNG\
-├── PDF\
-└── Results\
-```
+### GenerateCertificates.ps1
+
+Creates standard distance certificates.
+
+### GenerateCertificatesTIME.ps1
+
+Creates certificates containing both distance and recorded time.
 
 ---
 
-## Sample Output
+# Output Structure
 
 ```text
-PS C:\Certificates> .\GenerateCertificates.ps1
-Loading participants...
-Participants found: 3
-Creating PDF results file...
-Results PDF created.
-Outlook COM created successfully
-
-Row:
-  Name     = 'Participant One'
-  Email    = 'account@location.com.au'
-  Distance = 'DNS'
-  Time     = ''
-Processing DNS for Participant One
-DNS: Participant One - results only
-
-=== RESULTS EMAIL ===
-Name: Participant One
-Email: account@location.com.au
-Results PDF: C:\Certificates\Results\Aberfeldie-1-Hour-Track-Run-Results-2026.pdf
-Results exists: True
-Not adding certificate attachment...
-Adding results attachment...
-Number of attachments: 1
-Saving results email draft...
-Results email draft saved.
-Results email sent.
-Results email processing complete.
-
-Row:
-  Name     = 'Participant Two'
-  Email    = 'account@location.com.au'
-  Distance = '8730'
-  Time     = '45:56'
-Skipping timed result: Participant Two (45:56)
-
-Row:
-  Name     = 'Fred Nurk'
-  Email    = 'account@location.com.au'
-  Distance = '1145'
-  Time     = ''
-Processing DNS for Fred Nurk
-Generating certificate for Fred Nurk
-Created C:\Certificates\Output\PNG\004-Fred Nurk.png
-Number of attachments: 2
-Saving certificate email draft with cert and pdf...
-Results email sent with certs and pdfs.
-
-Completed.
-Certificates: C:\Certificates\Output\PNG
-Results PDF:  C:\Certificates\Results\Aberfeldie-1-Hour-Track-Run-Results-2026.pdf
-Email drafts created in Outlook.
+Output
+├── PNG
+├── PNG_TIME
+└── Results
 ```
+
+Where:
+
+```text
+PNG
+```
+
+contains standard certificates.
+
+```text
+PNG_TIME
+```
+
+contains certificates that include recorded times.
+
+```text
+Results
+```
+
+contains the generated PDF results file.
+
+---
+
+# Sample Output
+
+## Standard Certificate
+
+```text
+Distance Achieved
+
+8730 metres
+```
+
+## Time Certificate
+
+```text
+Distance Achieved
+
+12000 metres
+
+Time      1:00:00
+```
+
+---
 
 # Creating the Certificate Background
 
@@ -110,26 +178,24 @@ The certificate background is based on a photograph of an athlete's singlet.
 
 ## Source Image
 
-Use a high-resolution photo of the singlet.
+Use a high-resolution image.
 
 The image should:
 
-- Be centred on the certificate
-- Occupy most of the page
-- Be faded so certificate text remains readable
+- Be centred on the page
+- Occupy most of the certificate
+- Be faded sufficiently so all text remains readable
 
-## Background Settings
+## Recommended Settings
 
-Recommended settings:
-
-- Opacity: approximately 60%
 - White background
-- Singlet centred on page
-- No shadows or colour shifts
+- Approximately 60% opacity
+- Singlet centred
+- No shadows
 
-The Victorian Masters Athletics logo is positioned near the top of the certificate and scaled to approximately 200% of its original size.
+The Victorian Masters Athletics logo is positioned near the top of the page.
 
-The background image is stored as:
+The template image used by both scripts is:
 
 ```text
 CertificateTemplate.png
@@ -139,12 +205,13 @@ CertificateTemplate.png
 
 # Modifying Certificate Text
 
-All certificate text is added by the PowerShell script.
+Certificate text is rendered dynamically by PowerShell using `DrawString()`.
 
-Common fields include:
+## Standard Certificate
 
 ```text
 Presented to
+
 <Name>
 
 for participating in the
@@ -157,49 +224,89 @@ Distance Achieved
 <Distance> metres
 ```
 
-## Adjusting Text Position
+## Time Certificate
 
-Text placement is controlled by X/Y coordinates in the script.
+```text
+Presented to
+
+<Name>
+
+for participating in the
+
+Aberfeldie Masters Athletics
+1 Hour Track Run
+
+Distance Achieved
+
+<Distance> metres
+
+Time      <Time>
+```
+
+---
+
+# Adjusting Text Positions
+
+Text locations are controlled using X/Y coordinates.
 
 Example:
 
 ```powershell
 $Graphics.DrawString(
-    $Participant.Name,
+    $Name,
     $NameFont,
     $Brush,
-    500,
-    750,
-    $CenterFormat
+    $NameX,
+    $NameY
 )
 ```
 
-Where:
-
-- First coordinate = X position
-- Second coordinate = Y position
-
-Moving text:
+Movement rules:
 
 | Change | Action |
-|---------|---------|
+|----------|----------|
 | Move down | Increase Y |
 | Move up | Decrease Y |
 | Move right | Increase X |
 | Move left | Decrease X |
 
+## Current Coordinate Values
+
+```powershell
+$NameY = 1150
+$DistanceY = 1380
+```
+
+### TIME Certificate
+
+```powershell
+$TimeY = 1420
+```
+
+Time label position:
+
+```powershell
+($Bitmap.Width / 2) - 160
+```
+
+Time value position:
+
+```powershell
+($Bitmap.Width / 2) + 20
+```
+
 ---
 
 # Adjusting Fonts
 
-Fonts are defined within the script.
+Fonts are defined within the scripts.
 
 Example:
 
 ```powershell
 $NameFont = New-Object System.Drawing.Font(
     "Arial",
-    42,
+    20,
     [System.Drawing.FontStyle]::Bold
 )
 ```
@@ -215,7 +322,7 @@ Common adjustments:
 
 # Spreadsheet Format
 
-The spreadsheet must contain the following columns:
+The spreadsheet must contain the following columns.
 
 | Column | Required |
 |----------|----------|
@@ -230,261 +337,212 @@ Example:
 | No | Name | Email | Distance | Time |
 |----|------|--------|----------|------|
 | 1 | Maria Abfalter | example@example.com | DNS | |
-| 2 | Fred Nurk | example@example.com | 8730 | 45:56 |
+| 2 | Fred Nurk | example@example.com | 8730 | |
 | 3 | John Smith | example@example.com | 12000 | 1:00:00 |
 
 ---
 
 # Processing Rules
 
-## DNS Entries
+## GenerateCertificates.ps1
 
-If:
+### DNS Entry
+
+Example:
 
 ```text
 Distance = DNS
 ```
 
-Then:
+Result:
 
 - No certificate generated
-- Results PDF emailed
+- Results PDF attached
+- Email draft created
 - Participant remains in results PDF
 
----
-
-## Completed Time
+### Standard Distance Result
 
 Example:
 
 ```text
 Distance = 8730
-Time = <is blank>
+Time =
 ```
 
-Then:
+Result:
 
 - Certificate generated
 - Results PDF attached
 - Certificate attached
-- Email created
+- Email draft created
 
----
-
-## Did not complete 1 hr
+### Timed Result
 
 Example:
 
 ```text
 Distance = 12000
-Time = 40:35
+Time = 1:00:00
 ```
 
-Then:
+Result:
 
 - No certificate generated
 - No email generated
 - Participant remains in results PDF
 
-This behaviour was implemented to allow later addition of time results for participants who did not complete the 1 hour run.
+---
+
+## GenerateCertificatesTIME.ps1
+
+Processes only competitors with a value in the Time column.
+
+### No Time Recorded
+
+Example:
+
+```text
+Distance = 8730
+Time =
+```
+
+Result:
+
+- Skipped
+
+### Time Recorded
+
+Example:
+
+```text
+Distance = 12000
+Time = 1:00:00
+```
+
+Result:
+
+- Certificate generated
+- Results PDF attached
+- Certificate attached
+- Email draft created
+
+Certificates are written to:
+
+```text
+Output\PNG_TIME
+```
 
 ---
 
-# Running the Script
+# Running the Scripts
 
-Open PowerShell:
+Open PowerShell and change to the repository folder.
+
+## Standard Certificates
 
 ```powershell
-cd C:\Certificates
+cd C:\temp\AthleticsCertificateMaker
+
 .\GenerateCertificates.ps1
 ```
 
-Expected output includes:
+## Time Certificates
 
-```text
-Loading participants...
-Participants found: xx
+```powershell
+cd C:\temp\AthleticsCertificateMaker
 
-Creating PDF results file...
-Results PDF created.
-
-Creating certificates...
-Creating Outlook drafts...
+.\GenerateCertificatesTIME.ps1
 ```
 
 ---
 
 # Reviewing Output
 
-Certificate PNG files:
+### Standard Certificates
 
 ```text
 Output\PNG
 ```
 
-Results PDF:
+### Time Certificates
 
 ```text
-Output\PDF
+Output\PNG_TIME
 ```
 
-Review all generated files before sending emails.
+### Results PDF
+
+```text
+Results
+```
+
+Review all generated files and drafts before sending.
 
 ---
 
 # Outlook Requirements
 
-## Outlook 2016
-
-The email generation component currently relies on Outlook COM automation.
-
-The script was tested using:
-
-```text
-Microsoft Outlook 2016
-```
-
-Other Outlook installations may behave differently.
-
-Possible issues include:
-
-- Profile selection prompts
-- Outlook opening the wrong profile
-- COM automation hanging when Outlook is already running
-
-If issues occur:
-
-1. Close Outlook.
-2. End all Outlook processes.
-3. Run the script again.
-
-Example:
-
-```powershell
-Get-Process Outlook -ErrorAction SilentlyContinue |
-    Stop-Process -Force
-
-## Sending account
-
-The script now exposes the sending account as a top-level variable in GenerateCertificates.ps1:
-
-```powershell
-$SendUsingAccount = "account@location.com.au"
-```
-
-Edit that value to match the email account you want Outlook to send from (for example `"onehour@sportronics.com.au"`). The value must match an account present in your Outlook profile (Outlook.Session.Accounts).
-
-```text
-
-
----
-
-# Excel / Printer Requirement
-
-Although the script does not print anything, Excel may require a valid printer driver to be available.
-
-Symptoms include:
-
-- Excel opening but failing during export
-- PDF generation errors
-- Worksheet rendering problems
-
-Recommended:
-
-- Ensure at least one printer is installed.
-- A PDF printer is sufficient.
-- Microsoft Print to PDF is recommended.
-
----
-
-# Known Caveats
-
 ## Outlook COM Automation
 
-The script uses:
+The scripts use:
 
 ```powershell
 New-Object -ComObject Outlook.Application
 ```
 
-If Outlook profiles become corrupted or multiple Outlook versions are installed, email creation may fail.
+The solution was tested using Outlook 2016.
 
----
+Potential issues include:
 
-## Spreadsheet File Locks
+- Profile selection prompts
+- Incorrect Outlook profile opening
+- COM automation hanging
 
-Close the spreadsheet before running the script.
-
-Excel locking the workbook can prevent:
-
-- Reading participant data
-- Generating output files
-
----
-
-## Email Review
-
-It is strongly recommended to:
-
-- Generate drafts first
-- Review recipients
-- Verify certificate attachments
-- Verify PDF attachment
-
-before sending.
-
----
-
-# Recommended Folder Structure
-
-```text
-C:\Certificates
-│
-├── GenerateCertificates.ps1
-├── SendCertificates.ps1
-├── Participants.xlsx
-├── CertificateTemplate.png
-├── VMA_Logo.png
-│
-└── Output
-    ├── PNG
-    ├── PDF
-    └── Results
-```
-
----
-
-Note: GenerateCertificates.ps1 creates and (optionally) sends emails as part of its workflow. Because of this, SendCertificates.ps1 is not normally required and has not been tested as part of this repository's primary flow. Use SendCertificates.ps1 only if you have a specific separate sending workflow and verify its behaviour before relying on it.
-
-
-# Cleaning generated files
-
-A helper script, `clean.ps1`, is included to remove files that are generated by the scripts (for example files under Output\ and other script-created or editor temporary files that are listed in .gitignore).
-
-Important points:
-
-- The script deletes only files that Git reports as "ignored" (via `git ls-files --others --ignored --exclude-standard`). It will not remove tracked repository source files.
-- The script runs from the repository root and only deletes paths under the repository root.
-- The script explicitly skips anything inside the `.vs` folder.
-
-Usage:
+If issues occur:
 
 ```powershell
-.\clean.ps1 -WhatIf   # preview files that would be removed
-.\clean.ps1           # actually remove ignored/generated files
+Get-Process Outlook -ErrorAction SilentlyContinue |
+    Stop-Process -Force
 ```
 
-Run the preview first to confirm what will be deleted.
+Then restart Outlook and rerun the script.
 
-# Revision History
+---
 
-## Version 1.0
+## Sending Account
 
-Features:
+Configured near the top of each script:
 
-- PNG certificate generation
-- Results PDF generation
-- Outlook email draft generation
-- DNS results-only handling
-- Timed-result exclusion handling
-- Automated attachment processing
+```powershell
+$SendUsingAccount = "onehour@sportronics.com.au"
+```
+
+This value must match an account configured in Outlook.
+
+---
+
+# Excel / Printer Requirement
+
+Although nothing is printed, Excel PDF generation may require a valid printer driver.
+
+Recommended:
+
+```text
+Microsoft Print to PDF
+```
+
+or any installed printer.
+
+Symptoms of a missing printer include:
+
+- PDF generation failures
+- Export errors
+- Worksheet rendering issues
+
+---
+
+# Known Caveats
+
+
+> Nb: It was found that the local printer needed to be turned on athough no actual printing was done.

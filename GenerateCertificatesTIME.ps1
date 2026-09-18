@@ -5,14 +5,13 @@ $ErrorActionPreference = "Stop"
 
 $RootFolder = (Get-Location).Path
 
-# Outlook account to send from. Change this to the desired sending account.
-# Example: "account@location.com.au"
+# Outlook account to send from
 $SendUsingAccount = "account@location.com.au"
 
 $ExcelFile = Join-Path $RootFolder "Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx"
 $TemplateFile = Join-Path $RootFolder "CertificateTemplate.png"
 
-$PngFolder = Join-Path $RootFolder "Output\PNG"
+$PngFolder = Join-Path $RootFolder "Output\PNG_TIME"
 $ResultsFolder = Join-Path $RootFolder "Results"
 
 $ResultsXlsx = Join-Path $ResultsFolder "OfficialResults.xlsx"
@@ -32,7 +31,7 @@ $Participants = $Participants | Where-Object {
 Write-Host "Participants found: $($Participants.Count)"
 
 #
-# Create results workbook WITHOUT email addresses
+# Create Results Workbook (without email addresses)
 #
 $Participants |
     Select-Object No, Name, Distance, Time |
@@ -91,99 +90,18 @@ foreach ($Participant in $Participants)
     $Distance = [string]$Participant.Distance
     $Time     = [string]$Participant.Time
 
-
     #
-    # Timed results
-    # No certificate / no email
+    # TIME certificates only
     #
-    if (-not [string]::IsNullOrWhiteSpace($Time))
+    if ([string]::IsNullOrWhiteSpace($Time))
     {
-        Write-Host "Skipping timed result: $Name ($Time)" `
+        Write-Host "Skipping - no time recorded: $Name" `
             -ForegroundColor Yellow
         continue
     }
 
-    Write-Host "Processing DNS for $Name" -ForegroundColor Cyan
-    #
-    # DNS
-    # Results PDF only
-    #
-    if ($Distance.Trim().ToUpper() -eq "DNS")
-    {
-        Write-Host "DNS: $Name - results only" -ForegroundColor Cyan
-
-        if (-not [string]::IsNullOrWhiteSpace($Email))
-        {
-            Write-Host ""
-            Write-Host "=== RESULTS EMAIL ===" -ForegroundColor Cyan
-            Write-Host "Name: $Name"
-            Write-Host "Email: $Email"
-            Write-Host "Results PDF: $ResultsPdf"
-            Write-Host "Results exists: $(Test-Path $ResultsPdf)"
-
-            $Mail = $Outlook.CreateItem(0)
-
-            $Mail.SendUsingAccount =
-                $Outlook.Session.Accounts.Item($SendUsingAccount)
-
-            $Mail.To = $Email
-
-            $Mail.Subject =
-                "Aberfeldie Masters Athletics - 1 Hour Track Run Certificate"
-
-            $Mail.HTMLBody = @"
-    <p>Dear $Name,</p>
-
-    <p>Please find attached:</p>
-
-    <ul>
-    <li>Your participation certificate</li>
-    <li>The official event results</li>
-    </ul>
-
-    <p>
-    Recorded distance:
-    <strong>$Distance metres</strong>
-    </p>
-
-    <p>Thank you for participating.</p>
-
-    <p>
-    Regards<br/>
-    Aberfeldie Masters Athletics
-    </p>
-"@
-
-            Write-Host "Not adding certificate attachment..."
-
-            Write-Host "Adding results attachment..."
-            $Mail.Attachments.Add($ResultsPdf) | Out-Null
-
-            Write-Host "Number of attachments: $($Mail.Attachments.Count)" `
-                -ForegroundColor DarkGreen  -BackgroundColor Yellow
-
-            Write-Host "Saving results email draft..." `
-                -ForegroundColor DarkGreen  -BackgroundColor Yellow
-
-            # For testing: make changes to GenerateCertificates.ps1 then run.
-            # Emails will be saved to the Drafts folder only.
-            # To actually send automatically on generation uncomment the following line:
-            #$Mail.Send()
-
-            # Save the email to the draft folder without sending it
-            $Mail.Save()
-
-            Write-Host "Results email draft saved." `
-                -ForegroundColor DarkGreen  -BackgroundColor Yellow
-
-            Write-Host "Results email processing complete." `
-                -ForegroundColor DarkGreen  -BackgroundColor Yellow
-        }
-
-        continue
-    }
-
-    Write-Host "Generating certificate for $Name"
+    Write-Host "Generating TIME certificate for $Name" `
+        -ForegroundColor Cyan
 
     $Bitmap = New-Object System.Drawing.Bitmap $TemplateFile
 
@@ -207,15 +125,28 @@ foreach ($Participant in $Participants)
         [System.Drawing.FontStyle]::Bold
     )
 
+    $TimeLabelFont = New-Object System.Drawing.Font(
+        "Arial",
+        18,
+        [System.Drawing.FontStyle]::Bold
+    )
+
+    $TimeValueFont = New-Object System.Drawing.Font(
+        "Arial",
+        18,
+        [System.Drawing.FontStyle]::Bold
+    )
+
     $Brush = New-Object System.Drawing.SolidBrush(
         ([System.Drawing.Color]::FromArgb(0,20,90))
     )
 
     #
-    # Portrait certificate coordinates
+    # Certificate coordinates
     #
     $NameY = 1150
     $DistanceY = 1380
+    $TimeY = 1420
 
     $NameSize = $Graphics.MeasureString(
         $Name,
@@ -233,6 +164,9 @@ foreach ($Participant in $Participants)
 
     $DistanceX = ($Bitmap.Width - $DistanceSize.Width) / 2
 
+    #
+    # Draw name
+    #
     $Graphics.DrawString(
         $Name,
         $NameFont,
@@ -241,12 +175,34 @@ foreach ($Participant in $Participants)
         $NameY
     )
 
+    #
+    # Draw distance
+    #
     $Graphics.DrawString(
         $DistanceText,
         $DistanceFont,
         $Brush,
         $DistanceX,
         $DistanceY
+    )
+
+    #
+    # Draw time
+    #
+    $Graphics.DrawString(
+        "Time",
+        $TimeLabelFont,
+        $Brush,
+        ($Bitmap.Width / 2) - 160,
+        $TimeY
+    )
+
+    $Graphics.DrawString(
+        $Time,
+        $TimeValueFont,
+        $Brush,
+        ($Bitmap.Width / 2) + 20,
+        $TimeY
     )
 
     $SafeName = $Name -replace '[\\/:*?"<>|]', ''
@@ -270,10 +226,13 @@ foreach ($Participant in $Participants)
     {
         $Mail = $Outlook.CreateItem(0)
 
+        $Mail.SendUsingAccount =
+            $Outlook.Session.Accounts.Item($SendUsingAccount)
+
         $Mail.To = $Email
 
         $Mail.Subject =
-            "Aberfeldie Masters Athletics - 1 Hour Track Run Certificate"
+            "Aberfeldie Masters Athletics - 1 Hour Track Run Time Certificate"
 
         $Mail.HTMLBody = @"
 <p>Dear $Name,</p>
@@ -290,6 +249,11 @@ Recorded distance:
 <strong>$Distance metres</strong>
 </p>
 
+<p>
+Recorded time:
+<strong>$Time</strong>
+</p>
+
 <p>Thank you for participating.</p>
 
 <p>
@@ -301,21 +265,21 @@ Aberfeldie Masters Athletics
         $Mail.Attachments.Add($CertificateFile) | Out-Null
         $Mail.Attachments.Add($ResultsPdf) | Out-Null
 
-        Write-Host "Number of attachments: $($Mail.Attachments.Count)" -ForegroundColor Yellow -BackgroundColor DarkGreen
+        Write-Host "Number of attachments: $($Mail.Attachments.Count)" `
+            -ForegroundColor Yellow `
+            -BackgroundColor DarkGreen
 
-        #
-        # Draft for review
-        Write-Host "Saving certificate email draft with cert and pdf..." -ForegroundColor Yellow -BackgroundColor DarkGreen
-        # For testing: make changes to GenerateCertificates.ps1 then run.
-        # Emails will be saved to the Drafts folder only.
-        # To actually send automatically on generation uncomment the following line:
+        Write-Host "Saving certificate email draft..." `
+            -ForegroundColor Yellow `
+            -BackgroundColor DarkGreen
+
         #$Mail.Send()
 
-        # Save the email to the draft folder without sending it
         $Mail.Save()
 
-        Write-Host "Results email saved as draft with certs and pdfs." `
-            -ForegroundColor Yellow -BackgroundColor DarkGreen
+        Write-Host "Certificate email saved as draft." `
+            -ForegroundColor Yellow `
+            -BackgroundColor DarkGreen
     }
 }
 
