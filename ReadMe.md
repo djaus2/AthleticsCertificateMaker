@@ -7,7 +7,7 @@
 > [004-Fred Nurk.png](https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png)
 
 # Updates
-- As a 1hour event it is assumed that all athletes complete the 1 hour time. Where a time has been added for a participant  `GenerateCertificates.ps1` does not generate a a certicate and does not send anything to those participants but they are inluded in the results along with their time. The script ``GenerateCertificatesTIME.ps1 generates an alternative certificate including their time for those athletes and sends it along with the results; this is only for those with a time.
+- As a 1hour event, it is assumed that all athletes complete the 1 hour time. Where a time has been added for a participant  `GenerateCertificates.ps1` does not generate a a certicate and does not send anything to those participants but they are inluded in the results along with their time. The script ``GenerateCertificatesTIME.ps1 generates an alternative certificate including their time for those athletes and sends it along with the results; this is only for those with a time.
 
 This project generates:
 
