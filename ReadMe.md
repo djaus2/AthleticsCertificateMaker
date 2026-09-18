@@ -548,3 +548,10 @@ Symptoms of a missing printer include:
 > Nb: It was found that the local printer needed to be turned on athough no actual printing was done.
 
 > Depends upon Outlook 2016 with a profile that is used here.
+
+---
+---
+
+# To Do
+
+Parameterise these scripts so that this package can have simple reuse for slightly different contexts.
