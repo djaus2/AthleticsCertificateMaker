@@ -165,9 +165,9 @@ Distance Achieved
 ```text
 Distance Achieved
 
-12000 metres
+8730 metres
 
-Time      1:00:00
+Time      43:00
 ```
 
 ---
