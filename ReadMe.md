@@ -181,7 +181,7 @@ Distance
 10145 metres
 ```
 
-The Name and Distance labels are part of the template image.
+All labels are drawn by the script.
 
 ## Time Certificate
 
@@ -230,18 +230,18 @@ The Victorian Masters Athletics logo is positioned near the top of the page.
 Two template images are included:
 
 ```text
-CertificateTemplateorig.png
-```
-
-The original image with the *Name* and *Distance* labels baked in.
-Used by `GenerateCertificates.ps1`.
-
-```text
 CertificateTemplate.png
 ```
 
-The same image with those labels removed. Used by
-`GenerateCertificatesTIME.ps1`, which draws all labels itself.
+The label-free template used by both scripts — each script draws its own
+labels.
+
+```text
+CertificateTemplateorig.png
+```
+
+The original image with the *Name* and *Distance* labels baked in, kept
+as the unmodified source/backup.
 
 ---
 
@@ -251,8 +251,8 @@ Certificate text is rendered dynamically by PowerShell using `DrawString()`.
 
 ## Standard Certificate
 
-The *Name* and *Distance* labels are baked into `CertificateTemplateorig.png`.
-The script draws the values centred beneath each label:
+`CertificateTemplate.png` contains no labels; the script draws both
+groups — label above value:
 
 ```text
 Name
@@ -266,7 +266,7 @@ Distance
 
 ## Time Certificate
 
-`CertificateTemplate.png` contains no labels; the script draws all three
+The same label-free template is used; the script draws all three
 groups — label above value, equally spaced:
 
 ```text
@@ -315,8 +315,10 @@ Movement rules:
 ### Standard Certificate
 
 ```powershell
-$NameY = 1150
-$DistanceY = 1380
+$NameLabelY     = 1050
+$NameY          = 1150
+$DistanceLabelY = 1265
+$DistanceY      = 1380
 ```
 
 ### TIME Certificate
@@ -594,7 +596,7 @@ Configured near the top of each script:
 $SendUsingAccount = "account@location.com.au"
 ```
 
-This value must match an account configured in Outlook. If it does not,
+This value must match an account profile configured in Outlook 2016. If it does not,
 a warning is displayed and the default Outlook account is used.
 
 ---

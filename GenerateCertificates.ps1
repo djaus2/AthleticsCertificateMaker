@@ -99,7 +99,7 @@ $RootFolder = (Get-Location).Path
 $SendUsingAccount = "account@location.com.au"
 
 $ExcelFile = Join-Path $RootFolder "Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx"
-$TemplateFile = Join-Path $RootFolder "CertificateTemplateorig.png"
+$TemplateFile = Join-Path $RootFolder "CertificateTemplate.png"
 
 $PngFolder = Join-Path $RootFolder "Output\PNG"
 $ResultsFolder = Join-Path $RootFolder "Results"
@@ -292,6 +292,12 @@ foreach ($Participant in $Participants)
     $Graphics.TextRenderingHint =
         [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 
+    $LabelFont = New-Object System.Drawing.Font(
+        "Arial",
+        18,
+        [System.Drawing.FontStyle]::Regular
+    )
+
     $NameFont = New-Object System.Drawing.Font(
         "Arial",
         20,
@@ -310,25 +316,37 @@ foreach ($Participant in $Participants)
 
     #
     # Portrait certificate coordinates
+    # Two groups: label above value
     #
-    $NameY = 1150
-    $DistanceY = 1380
-
-    $NameSize = $Graphics.MeasureString(
-        $Name,
-        $NameFont
-    )
-
-    $NameX = ($Bitmap.Width - $NameSize.Width) / 2
+    $NameLabelY     = 1050
+    $NameY          = 1150
+    $DistanceLabelY = 1265
+    $DistanceY      = 1380
 
     $DistanceText = "$Distance metres"
 
-    $DistanceSize = $Graphics.MeasureString(
-        $DistanceText,
-        $DistanceFont
-    )
+    $NameLabelSize = $Graphics.MeasureString("Name", $LabelFont)
+    $NameLabelX = ($Bitmap.Width - $NameLabelSize.Width) / 2
 
+    $NameSize = $Graphics.MeasureString($Name, $NameFont)
+    $NameX = ($Bitmap.Width - $NameSize.Width) / 2
+
+    $DistanceLabelSize = $Graphics.MeasureString("Distance", $LabelFont)
+    $DistanceLabelX = ($Bitmap.Width - $DistanceLabelSize.Width) / 2
+
+    $DistanceSize = $Graphics.MeasureString($DistanceText, $DistanceFont)
     $DistanceX = ($Bitmap.Width - $DistanceSize.Width) / 2
+
+    #
+    # Draw name
+    #
+    $Graphics.DrawString(
+        "Name",
+        $LabelFont,
+        $Brush,
+        $NameLabelX,
+        $NameLabelY
+    )
 
     $Graphics.DrawString(
         $Name,
@@ -336,6 +354,17 @@ foreach ($Participant in $Participants)
         $Brush,
         $NameX,
         $NameY
+    )
+
+    #
+    # Draw distance
+    #
+    $Graphics.DrawString(
+        "Distance",
+        $LabelFont,
+        $Brush,
+        $DistanceLabelX,
+        $DistanceLabelY
     )
 
     $Graphics.DrawString(
