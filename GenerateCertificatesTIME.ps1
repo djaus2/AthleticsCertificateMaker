@@ -3,6 +3,95 @@ Add-Type -AssemblyName System.Drawing
 
 $ErrorActionPreference = "Stop"
 
+#
+# Check which email actions are enabled in this script:
+#   $Mail.Save()  - save to Drafts only
+#   $Mail.Send()  - actually send
+# Both enabled    -> abort: only one can be enabled
+# Send enabled    -> warn and confirm before continuing
+# Neither enabled -> warn that no certificate emails will be produced
+#
+Add-Type -AssemblyName PresentationFramework
+
+$tokens = $null
+$parseErrors = $null
+$ast = [System.Management.Automation.Language.Parser]::ParseFile(
+    $PSCommandPath,
+    [ref]$tokens,
+    [ref]$parseErrors
+)
+
+$commentExtents = @(
+    $tokens |
+        Where-Object { $_.Kind -eq 'Comment' } |
+        ForEach-Object { $_.Extent }
+)
+
+function Test-MailCallEnabled {
+    param([string]$MethodName)
+
+    $calls = $ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.InvokeMemberExpressionAst] -and
+            $node.Member.Value -eq $MethodName -and
+            $node.Expression.Extent.Text -eq '$Mail'
+    }, $true)
+
+    foreach ($call in $calls) {
+        $insideComment = $false
+        foreach ($extent in $commentExtents) {
+            if ($call.Extent.StartOffset -ge $extent.StartOffset -and
+                $call.Extent.EndOffset -le $extent.EndOffset) {
+                $insideComment = $true
+                break
+            }
+        }
+        if (-not $insideComment) {
+            return $true
+        }
+    }
+    return $false
+}
+
+$SendEnabled = Test-MailCallEnabled 'Send'
+$SaveEnabled = Test-MailCallEnabled 'Save'
+
+if ($SendEnabled -and $SaveEnabled) {
+    [System.Windows.MessageBox]::Show(
+        "Both `$Mail.Save() and `$Mail.Send() are enabled.`nOnly one can be enabled.`n`nThe script will now abort.",
+        "Email configuration error",
+        [System.Windows.MessageBoxButton]::OK,
+        [System.Windows.MessageBoxImage]::Error
+    ) | Out-Null
+    exit 1
+}
+
+if ($SendEnabled) {
+    $result = [System.Windows.MessageBox]::Show(
+        "`$Mail.Send() is enabled.`n`nCertificate emails will actually be SENT.`n`nContinue?",
+        "Send confirmation",
+        [System.Windows.MessageBoxButton]::YesNo,
+        [System.Windows.MessageBoxImage]::Warning
+    )
+    if ($result -ne [System.Windows.MessageBoxResult]::Yes) {
+        Write-Host "Aborted." -ForegroundColor Yellow
+        exit 1
+    }
+}
+
+if (-not $SendEnabled -and -not $SaveEnabled) {
+    $result = [System.Windows.MessageBox]::Show(
+        "Neither `$Mail.Save() nor `$Mail.Send() is enabled.`n`nNo certificate emails will be created.`n`nContinue?",
+        "Email disabled",
+        [System.Windows.MessageBoxButton]::YesNo,
+        [System.Windows.MessageBoxImage]::Warning
+    )
+    if ($result -ne [System.Windows.MessageBoxResult]::Yes) {
+        Write-Host "Aborted." -ForegroundColor Yellow
+        exit 1
+    }
+}
+
 $RootFolder = (Get-Location).Path
 
 # Outlook account to send from
@@ -113,6 +202,12 @@ foreach ($Participant in $Participants)
     $Graphics.TextRenderingHint =
         [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 
+    $LabelFont = New-Object System.Drawing.Font(
+        "Arial",
+        18,
+        [System.Drawing.FontStyle]::Regular
+    )
+
     $NameFont = New-Object System.Drawing.Font(
         "Arial",
         20,
@@ -120,12 +215,6 @@ foreach ($Participant in $Participants)
     )
 
     $DistanceFont = New-Object System.Drawing.Font(
-        "Arial",
-        18,
-        [System.Drawing.FontStyle]::Bold
-    )
-
-    $TimeLabelFont = New-Object System.Drawing.Font(
         "Arial",
         18,
         [System.Drawing.FontStyle]::Bold
@@ -143,30 +232,46 @@ foreach ($Participant in $Participants)
 
     #
     # Certificate coordinates
+    # Three groups, equally spaced: label above value
     #
-    $NameY = 1150
-    $DistanceY = 1380
-    $TimeY = 1420
-
-    $NameSize = $Graphics.MeasureString(
-        $Name,
-        $NameFont
-    )
-
-    $NameX = ($Bitmap.Width - $NameSize.Width) / 2
+    $NameLabelY     = 1030
+    $NameY          = 1110
+    $DistanceLabelY = 1190
+    $DistanceY      = 1270
+    $TimeLabelY     = 1350
+    $TimeY          = 1430
 
     $DistanceText = "$Distance metres"
 
-    $DistanceSize = $Graphics.MeasureString(
-        $DistanceText,
-        $DistanceFont
-    )
+    $NameLabelSize = $Graphics.MeasureString("Name", $LabelFont)
+    $NameLabelX = ($Bitmap.Width - $NameLabelSize.Width) / 2
 
+    $NameSize = $Graphics.MeasureString($Name, $NameFont)
+    $NameX = ($Bitmap.Width - $NameSize.Width) / 2
+
+    $DistanceLabelSize = $Graphics.MeasureString("Distance", $LabelFont)
+    $DistanceLabelX = ($Bitmap.Width - $DistanceLabelSize.Width) / 2
+
+    $DistanceSize = $Graphics.MeasureString($DistanceText, $DistanceFont)
     $DistanceX = ($Bitmap.Width - $DistanceSize.Width) / 2
+
+    $TimeLabelSize = $Graphics.MeasureString("Time", $LabelFont)
+    $TimeLabelX = ($Bitmap.Width - $TimeLabelSize.Width) / 2
+
+    $TimeSize = $Graphics.MeasureString($Time, $TimeValueFont)
+    $TimeX = ($Bitmap.Width - $TimeSize.Width) / 2
 
     #
     # Draw name
     #
+    $Graphics.DrawString(
+        "Name",
+        $LabelFont,
+        $Brush,
+        $NameLabelX,
+        $NameLabelY
+    )
+
     $Graphics.DrawString(
         $Name,
         $NameFont,
@@ -178,6 +283,14 @@ foreach ($Participant in $Participants)
     #
     # Draw distance
     #
+    $Graphics.DrawString(
+        "Distance",
+        $LabelFont,
+        $Brush,
+        $DistanceLabelX,
+        $DistanceLabelY
+    )
+
     $Graphics.DrawString(
         $DistanceText,
         $DistanceFont,
@@ -191,17 +304,17 @@ foreach ($Participant in $Participants)
     #
     $Graphics.DrawString(
         "Time",
-        $TimeLabelFont,
+        $LabelFont,
         $Brush,
-        ($Bitmap.Width / 2) - 160,
-        $TimeY
+        $TimeLabelX,
+        $TimeLabelY
     )
 
     $Graphics.DrawString(
         $Time,
         $TimeValueFont,
         $Brush,
-        ($Bitmap.Width / 2) + 20,
+        $TimeX,
         $TimeY
     )
 

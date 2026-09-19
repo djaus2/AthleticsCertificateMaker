@@ -3,6 +3,95 @@ Add-Type -AssemblyName System.Drawing
 
 $ErrorActionPreference = "Stop"
 
+#
+# Check which email actions are enabled in this script:
+#   $Mail.Save()  - save to Drafts only
+#   $Mail.Send()  - actually send
+# Both enabled    -> abort: only one can be enabled
+# Send enabled    -> warn and confirm before continuing
+# Neither enabled -> warn that no certificate emails will be produced
+#
+Add-Type -AssemblyName PresentationFramework
+
+$tokens = $null
+$parseErrors = $null
+$ast = [System.Management.Automation.Language.Parser]::ParseFile(
+    $PSCommandPath,
+    [ref]$tokens,
+    [ref]$parseErrors
+)
+
+$commentExtents = @(
+    $tokens |
+        Where-Object { $_.Kind -eq 'Comment' } |
+        ForEach-Object { $_.Extent }
+)
+
+function Test-MailCallEnabled {
+    param([string]$MethodName)
+
+    $calls = $ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.InvokeMemberExpressionAst] -and
+            $node.Member.Value -eq $MethodName -and
+            $node.Expression.Extent.Text -eq '$Mail'
+    }, $true)
+
+    foreach ($call in $calls) {
+        $insideComment = $false
+        foreach ($extent in $commentExtents) {
+            if ($call.Extent.StartOffset -ge $extent.StartOffset -and
+                $call.Extent.EndOffset -le $extent.EndOffset) {
+                $insideComment = $true
+                break
+            }
+        }
+        if (-not $insideComment) {
+            return $true
+        }
+    }
+    return $false
+}
+
+$SendEnabled = Test-MailCallEnabled 'Send'
+$SaveEnabled = Test-MailCallEnabled 'Save'
+
+if ($SendEnabled -and $SaveEnabled) {
+    [System.Windows.MessageBox]::Show(
+        "Both `$Mail.Save() and `$Mail.Send() are enabled.`nOnly one can be enabled.`n`nThe script will now abort.",
+        "Email configuration error",
+        [System.Windows.MessageBoxButton]::OK,
+        [System.Windows.MessageBoxImage]::Error
+    ) | Out-Null
+    exit 1
+}
+
+if ($SendEnabled) {
+    $result = [System.Windows.MessageBox]::Show(
+        "`$Mail.Send() is enabled.`n`nCertificate emails will actually be SENT.`n`nContinue?",
+        "Send confirmation",
+        [System.Windows.MessageBoxButton]::YesNo,
+        [System.Windows.MessageBoxImage]::Warning
+    )
+    if ($result -ne [System.Windows.MessageBoxResult]::Yes) {
+        Write-Host "Aborted." -ForegroundColor Yellow
+        exit 1
+    }
+}
+
+if (-not $SendEnabled -and -not $SaveEnabled) {
+    $result = [System.Windows.MessageBox]::Show(
+        "Neither `$Mail.Save() nor `$Mail.Send() is enabled.`n`nNo certificate emails will be created.`n`nContinue?",
+        "Email disabled",
+        [System.Windows.MessageBoxButton]::YesNo,
+        [System.Windows.MessageBoxImage]::Warning
+    )
+    if ($result -ne [System.Windows.MessageBoxResult]::Yes) {
+        Write-Host "Aborted." -ForegroundColor Yellow
+        exit 1
+    }
+}
+
 $RootFolder = (Get-Location).Path
 
 # Outlook account to send from. Change this to the desired sending account.
@@ -10,7 +99,7 @@ $RootFolder = (Get-Location).Path
 $SendUsingAccount = "account@location.com.au"
 
 $ExcelFile = Join-Path $RootFolder "Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx"
-$TemplateFile = Join-Path $RootFolder "CertificateTemplate.png"
+$TemplateFile = Join-Path $RootFolder "CertificateTemplateorig.png"
 
 $PngFolder = Join-Path $RootFolder "Output\PNG"
 $ResultsFolder = Join-Path $RootFolder "Results"
