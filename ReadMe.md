@@ -7,7 +7,7 @@
 > [004-Fred Nurk.png](https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png)
 
 # Updates
-- As a 1hour event, it is assumed that all athletes complete the 1 hour time. Where a time has been added for a participant  `GenerateCertificates.ps1` does not generate a a certicate and does not send anything to those participants but they are inluded in the results along with their time. The script ``GenerateCertificatesTIME.ps1 generates an alternative certificate including their time for those athletes and sends it along with the results; this is only for those with a time.
+- As a 1 hour event, it is assumed that all athletes complete the 1 hour time. Where a time has been added for a participant, `GenerateCertificates.ps1` does not generate a certificate and does not send anything to those participants but they are included in the results along with their time. The script `GenerateCertificatesTIME.ps1` generates an alternative certificate including their time for those athletes and sends it along with the results; this is only for those with a time.
 
 This project generates:
 
@@ -90,10 +90,27 @@ Immediately sends the email using the configured Outlook account.
 The sending account is specified near the top of each script:
 
 ```powershell
-$SendUsingAccount = "onehour@sportronics.com.au"
+$SendUsingAccount = "account@location.com.au"
 ```
 
-The account must exist in the Outlook profile.
+The value is resolved once when the script starts:
+
+- If the account exists in the Outlook profile it is used for all emails.
+- If it does not exist (for example the placeholder above), a warning is
+  displayed and the default Outlook account is used instead.
+
+### Startup Email-Mode Check
+
+When each script starts it scans its own source to determine whether
+`$Mail.Save()` and/or `$Mail.Send()` are enabled — commented-out lines are
+ignored:
+
+| State | Behaviour |
+|-------|-----------|
+| `Save` only | Runs silently (draft mode) |
+| `Send` only | Warning popup: emails will actually be sent; must confirm to continue |
+| Both enabled | Error popup and abort: only one may be enabled |
+| Neither enabled | Warning popup that no emails will be produced |
 
 ---
 
@@ -155,20 +172,35 @@ contains the generated PDF results file.
 ## Standard Certificate
 
 ```text
-Distance Achieved
+Name
 
-8730 metres
+Fred Nurk
+
+Distance
+
+10145 metres
 ```
+
+The Name and Distance labels are part of the template image.
 
 ## Time Certificate
 
 ```text
-Distance Achieved
+Name
+
+Julie Smith
+
+Distance
 
 8730 metres
 
-Time      43:00
+Time
+
+45:56
 ```
+
+On the time certificate all labels are drawn by the script: each label
+sits above its value and the three groups are equally spaced.
 
 ---
 
@@ -195,11 +227,21 @@ The image should:
 
 The Victorian Masters Athletics logo is positioned near the top of the page.
 
-The template image used by both scripts is:
+Two template images are included:
+
+```text
+CertificateTemplateorig.png
+```
+
+The original image with the *Name* and *Distance* labels baked in.
+Used by `GenerateCertificates.ps1`.
 
 ```text
 CertificateTemplate.png
 ```
+
+The same image with those labels removed. Used by
+`GenerateCertificatesTIME.ps1`, which draws all labels itself.
 
 ---
 
@@ -209,38 +251,36 @@ Certificate text is rendered dynamically by PowerShell using `DrawString()`.
 
 ## Standard Certificate
 
+The *Name* and *Distance* labels are baked into `CertificateTemplateorig.png`.
+The script draws the values centred beneath each label:
+
 ```text
-Presented to
+Name
 
 <Name>
 
-for participating in the
-
-Aberfeldie Masters Athletics
-1 Hour Track Run
-
-Distance Achieved
+Distance
 
 <Distance> metres
 ```
 
 ## Time Certificate
 
+`CertificateTemplate.png` contains no labels; the script draws all three
+groups — label above value, equally spaced:
+
 ```text
-Presented to
+Name
 
 <Name>
 
-for participating in the
-
-Aberfeldie Masters Athletics
-1 Hour Track Run
-
-Distance Achieved
+Distance
 
 <Distance> metres
 
-Time      <Time>
+Time
+
+<Time>
 ```
 
 ---
@@ -272,6 +312,8 @@ Movement rules:
 
 ## Current Coordinate Values
 
+### Standard Certificate
+
 ```powershell
 $NameY = 1150
 $DistanceY = 1380
@@ -279,20 +321,16 @@ $DistanceY = 1380
 
 ### TIME Certificate
 
-```powershell
-$TimeY = 1420
-```
-
-Time label position:
+All strings are centred horizontally. Each label sits 80 px above its
+value and the three groups are equally spaced:
 
 ```powershell
-($Bitmap.Width / 2) - 160
-```
-
-Time value position:
-
-```powershell
-($Bitmap.Width / 2) + 20
+$NameLabelY     = 1030
+$NameY          = 1110
+$DistanceLabelY = 1190
+$DistanceY      = 1270
+$TimeLabelY     = 1350
+$TimeY          = 1430
 ```
 
 ---
@@ -481,6 +519,32 @@ Review all generated files and drafts before sending.
 
 ---
 
+# Cleaning Generated Output
+
+`clean.ps1` empties all generated content while leaving the folders in
+place:
+
+- `Output\*` — generated certificates and PDFs (keeps the tracked sample
+  `004-Fred Nurk.png`)
+- `Results\*` — generated results workbook and PDF
+- `logs\*` — generated logs
+- `~$*.xlsx` — Excel lock files
+- `,\` — stray folder left by a buggy run (removed entirely)
+
+Preview what would be deleted without removing anything:
+
+```powershell
+.\clean.ps1 -WhatIf
+```
+
+Then run for real:
+
+```powershell
+.\clean.ps1
+```
+
+---
+
 # Outlook Requirements
 
 ## Outlook COM Automation
@@ -493,8 +557,20 @@ New-Object -ComObject Outlook.Application
 
 The solution was tested using Outlook 2016.
 
+A **classic (desktop) Outlook** profile is required — the "New Outlook"
+app does not support COM automation and does not create a mail profile.
+
+The profile must be set as the default so automation can open it without
+prompting:
+
+```text
+Control Panel → Mail (Microsoft Outlook) → Show Profiles →
+Always use this profile
+```
+
 Potential issues include:
 
+- No mail profile configured ("no profile" COM error)
 - Profile selection prompts
 - Incorrect Outlook profile opening
 - COM automation hanging
@@ -515,10 +591,11 @@ Then restart Outlook and rerun the script.
 Configured near the top of each script:
 
 ```powershell
-$SendUsingAccount = "account@location.com.au""
+$SendUsingAccount = "account@location.com.au"
 ```
 
-This value must match an account configured in Outlook.
+This value must match an account configured in Outlook. If it does not,
+a warning is displayed and the default Outlook account is used.
 
 ---
 
@@ -547,7 +624,7 @@ Symptoms of a missing printer include:
 
 > Nb: It was found that the local printer needed to be turned on athough no actual printing was done.
 
-> Depends upon Outlook 2016 with a profile that is used here.
+> Depends upon classic desktop Outlook (2016) with a default mail profile configured.
 
 ---
 ---
