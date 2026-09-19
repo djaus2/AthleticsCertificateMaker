@@ -166,6 +166,15 @@ if ($null -eq $Outlook)
 
 Write-Host "Outlook COM created successfully" -ForegroundColor Green
 
+#
+# Resolve send-as account once; fall back to default if not configured
+#
+$SendAccount = $Outlook.Session.Accounts.Item($SendUsingAccount)
+if ($null -eq $SendAccount) {
+    Write-Host "Account '$SendUsingAccount' not found - using default account" `
+        -ForegroundColor Yellow
+}
+
 foreach ($Participant in $Participants)
 {
     if ([string]::IsNullOrWhiteSpace($Participant.Name))
@@ -339,8 +348,7 @@ foreach ($Participant in $Participants)
     {
         $Mail = $Outlook.CreateItem(0)
 
-        $Mail.SendUsingAccount =
-            $Outlook.Session.Accounts.Item($SendUsingAccount)
+        $Mail.SendUsingAccount = $SendAccount
 
         $Mail.To = $Email
 
