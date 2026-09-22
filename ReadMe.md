@@ -313,6 +313,16 @@ Movement rules:
 
 ## Current Coordinate Values
 
+### Title (both scripts)
+
+The title "1 HOUR TRACK RUN" is drawn by the scripts — Times New Roman
+bold, 100 px, horizontally squeezed to the original baked width:
+
+```powershell
+$TitleY     = 70
+$TitleWidth = 818
+```
+
 ### Standard Certificate
 
 ```powershell
@@ -634,4 +644,5 @@ Symptoms of a missing printer include:
 
 # To Do
 
-Parameterise these scripts so that this package can have simple reuse for slightly different contexts.
+- Parameterise these scripts so that this package can have simple reuse for slightly different contexts.
+- Move the subtitle ("Moonee Valley Athletics Centre"), sub-sub title ("Aberfeldie Masters Athletics") and date from the template image into the generate scripts (same approach as the Name/Distance labels and the Title — strip from `CertificateTemplate.png`, draw via `DrawString()`). The Title "1 HOUR TRACK RUN" is already script-drawn.

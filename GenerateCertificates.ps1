@@ -292,6 +292,13 @@ foreach ($Participant in $Participants)
     $Graphics.TextRenderingHint =
         [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 
+    $TitleFont = New-Object System.Drawing.Font(
+        "Times New Roman",
+        100,
+        [System.Drawing.FontStyle]::Bold,
+        [System.Drawing.GraphicsUnit]::Pixel
+    )
+
     $LabelFont = New-Object System.Drawing.Font(
         "Arial",
         18,
@@ -316,8 +323,11 @@ foreach ($Participant in $Participants)
 
     #
     # Portrait certificate coordinates
-    # Two groups: label above value
+    # Title, then two groups: label above value
     #
+    $TitleY         = 70
+    $TitleWidth     = 818
+
     $NameLabelY     = 1050
     $NameY          = 1150
     $DistanceLabelY = 1265
@@ -336,6 +346,31 @@ foreach ($Participant in $Participants)
 
     $DistanceSize = $Graphics.MeasureString($DistanceText, $DistanceFont)
     $DistanceX = ($Bitmap.Width - $DistanceSize.Width) / 2
+
+    #
+    # Draw title
+    #
+    $Title = "1 HOUR TRACK RUN"
+
+    $TitleSize = $Graphics.MeasureString($Title, $TitleFont)
+
+    #
+    # Squeeze horizontally to match the original baked title width
+    #
+    $TitleScaleX = $TitleWidth / $TitleSize.Width
+
+    $state = $Graphics.Save()
+    $Graphics.ScaleTransform($TitleScaleX, 1)
+
+    $Graphics.DrawString(
+        $Title,
+        $TitleFont,
+        $Brush,
+        (($Bitmap.Width / 2) / $TitleScaleX) - ($TitleSize.Width / 2),
+        $TitleY
+    )
+
+    $Graphics.Restore($state)
 
     #
     # Draw name
