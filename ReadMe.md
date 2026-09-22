@@ -318,15 +318,20 @@ Movement rules:
 
 ## Current Coordinate Values
 
-### Title (both scripts)
+### Header text (both scripts)
 
-The title "1 HOUR TRACK RUN" is drawn by the scripts — Times New Roman
-bold, 100 px, horizontally squeezed to the original baked width:
+The four header lines are drawn by the scripts, defined once in
+`CertificateText.ps1`, which both scripts dot-source:
 
-```powershell
-$TitleY     = 70
-$TitleWidth = 818
-```
+| Name | Text | Font | Size | Y | Width |
+|------|------|------|------|---|-------|
+| Title | 1 HOUR TRACK RUN | Times New Roman Bold | 100 px | 70 | 818 |
+| SubTitle | Moonee Valley Athletics Centre | Arial Narrow | 46 px | 180 | 614 |
+| Host | Aberfeldie Masters Athletics | Times New Roman Italic | 38 px | 247 | 459 |
+| Date | 16 September 2026 | Arial Narrow | 32 px | 312 | 266 |
+
+Each line is centred horizontally and squeezed horizontally to `Width`
+to match the original baked text.
 
 ### Standard Certificate
 
@@ -650,4 +655,4 @@ Symptoms of a missing printer include:
 # To Do
 
 - Parameterise these scripts so that this package can have simple reuse for slightly different contexts.
-- Move the subtitle ("Moonee Valley Athletics Centre"), sub-sub title ("Aberfeldie Masters Athletics") and date from the template image into the generate scripts (same approach as the Name/Distance labels and the Title — strip from `CertificateTemplate.png`, draw via `DrawString()`). The Title "1 HOUR TRACK RUN" is already script-drawn.
+- Parameterise the script-drawn strings ($Title, $Subtitle, $HostText, $DateText) so a different event can be configured without editing the drawing code.

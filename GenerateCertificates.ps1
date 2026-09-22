@@ -101,6 +101,9 @@ $SendUsingAccount = "account@location.com.au"
 $ExcelFile = Join-Path $RootFolder "Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx"
 $TemplateFile = Join-Path $RootFolder "CertificateTemplate.png"
 
+# Header text definitions shared by both scripts (title, subtitle, host, date)
+. (Join-Path $PSScriptRoot "CertificateText.ps1")
+
 $PngFolder = Join-Path $RootFolder "Output\PNG"
 $ResultsFolder = Join-Path $RootFolder "Results"
 
@@ -292,13 +295,6 @@ foreach ($Participant in $Participants)
     $Graphics.TextRenderingHint =
         [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 
-    $TitleFont = New-Object System.Drawing.Font(
-        "Times New Roman",
-        100,
-        [System.Drawing.FontStyle]::Bold,
-        [System.Drawing.GraphicsUnit]::Pixel
-    )
-
     $LabelFont = New-Object System.Drawing.Font(
         "Arial",
         18,
@@ -323,11 +319,8 @@ foreach ($Participant in $Participants)
 
     #
     # Portrait certificate coordinates
-    # Title, then two groups: label above value
+    # Two groups: label above value
     #
-    $TitleY         = 70
-    $TitleWidth     = 818
-
     $NameLabelY     = 1050
     $NameY          = 1150
     $DistanceLabelY = 1265
@@ -348,29 +341,37 @@ foreach ($Participant in $Participants)
     $DistanceX = ($Bitmap.Width - $DistanceSize.Width) / 2
 
     #
-    # Draw title
+    # Draw header text (defined in CertificateText.ps1)
     #
-    $Title = "1 HOUR TRACK RUN"
+    foreach ($item in $CertificateText) {
+        $font = New-Object System.Drawing.Font(
+            $item.Font,
+            $item.Size,
+            [System.Drawing.FontStyle]($item.Style),
+            [System.Drawing.GraphicsUnit]::Pixel
+        )
 
-    $TitleSize = $Graphics.MeasureString($Title, $TitleFont)
+        $textSize = $Graphics.MeasureString($item.Text, $font)
 
-    #
-    # Squeeze horizontally to match the original baked title width
-    #
-    $TitleScaleX = $TitleWidth / $TitleSize.Width
+        #
+        # Squeeze horizontally to match the original baked width
+        #
+        $scaleX = $item.Width / $textSize.Width
 
-    $state = $Graphics.Save()
-    $Graphics.ScaleTransform($TitleScaleX, 1)
+        $state = $Graphics.Save()
+        $Graphics.ScaleTransform($scaleX, 1)
 
-    $Graphics.DrawString(
-        $Title,
-        $TitleFont,
-        $Brush,
-        (($Bitmap.Width / 2) / $TitleScaleX) - ($TitleSize.Width / 2),
-        $TitleY
-    )
+        $Graphics.DrawString(
+            $item.Text,
+            $font,
+            $Brush,
+            (($Bitmap.Width / 2) / $scaleX) - ($textSize.Width / 2),
+            $item.Y
+        )
 
-    $Graphics.Restore($state)
+        $Graphics.Restore($state)
+        $font.Dispose()
+    }
 
     #
     # Draw name
