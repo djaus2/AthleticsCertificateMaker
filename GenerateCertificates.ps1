@@ -352,24 +352,16 @@ foreach ($Participant in $Participants)
         )
 
         $textSize = $Graphics.MeasureString($item.Text, $font)
-
-        #
-        # Squeeze horizontally to match the original baked width
-        #
-        $scaleX = $item.Width / $textSize.Width
-
-        $state = $Graphics.Save()
-        $Graphics.ScaleTransform($scaleX, 1)
+        $textX = ($Bitmap.Width - $textSize.Width) / 2
 
         $Graphics.DrawString(
             $item.Text,
             $font,
             $Brush,
-            (($Bitmap.Width / 2) / $scaleX) - ($textSize.Width / 2),
+            $textX,
             $item.Y
         )
 
-        $Graphics.Restore($state)
         $font.Dispose()
     }
 

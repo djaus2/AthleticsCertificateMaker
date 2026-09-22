@@ -5,29 +5,29 @@ certificate generator.
 
 ## Repository
 
-- Work moved entirely to `C:\temp\AthleticsCertificateMaker`, a clone of
-  <https://github.com/djaus2/AthleticsCertificateMaker>. The older
-  `C:\Certificates` folder points at the old repo
-  (`djaus2/AthsCertificateMaker`) and is no longer being modified.
+- Work is in`\AthleticsCertificateMaker`, a clone of
+  <https://github.com/djaus2/AthleticsCertificateMaker>
 
 ## Certificate text moved from image to scripts
+
+See [CertificateTemplate.png](https://github.com/djaus2/AthleticsCertificateMaker/blob/main/CertificateTemplate.png)
 
 All text that was previously baked into the certificate template image
 is now drawn by the scripts. `CertificateTemplate.png` is now pure
 artwork (frame, singlet, logo) and `CertificateTemplateorig.png` is kept
 untouched as the unmodified master.
 
-| Name | Text | Font | Size | Y | Width |
-|------|------|------|------|---|-------|
-| Title | 1 HOUR TRACK RUN | Times New Roman Bold | 100 px | 70 | 818 |
-| SubTitle | Moonee Valley Athletics Centre | Arial Narrow | 46 px | 180 | 614 |
-| Host | Aberfeldie Masters Athletics | Times New Roman Italic | 38 px | 247 | 459 |
-| Date | 16 September 2026 | Arial Narrow | 32 px | 312 | 266 |
+| Name | Text | Font | Size | Y |
+|------|------|------|------|---|
+| Title | 1 HOUR TRACK RUN | Times New Roman Bold | 77 px | 70 |
+| SubTitle | Moonee Valley Athletics Centre | Arial Narrow | 51 px | 180 |
+| Host | Aberfeldie Masters Athletics | Times New Roman Italic | 38 px | 247 |
+| Date | 16 September 2026 | Arial Narrow | 34 px | 312 |
 
 These definitions live in `CertificateText.ps1`, which both
 `GenerateCertificates.ps1` and `GenerateCertificatesTIME.ps1`
 dot-source — so the event wording only needs editing in one place. Each
-line is drawn centred and squeezed horizontally to the recorded width.
+line is drawn centred at its natural width.
 
 The same was done earlier for the field labels: the standard script
 draws *Name*/*Distance* labels above their values, and the TIME script
@@ -49,11 +49,13 @@ fonts had to be identified by measurement and eyeball:
    side-by-side with the original strip and matched by shape — this is
    how Arial Narrow (subtitle, date) and Times New Roman italic (host
    line) were identified.
-4. **Reproduce the condensation.** The baked text is narrower than the
-   same font at the same height would naturally render — it was
-   horizontally compressed when the artwork was created. The scripts
-   replicate this with `Graphics.ScaleTransform`, squeezing each line to
-   its measured width while keeping the correct height.
+4. **Condensation.** The baked text is narrower than the same font at
+   the same height would naturally render — it was horizontally
+   compressed when the artwork was created. An initial implementation
+   replicated this with `Graphics.ScaleTransform`, but that was dropped
+   in favour of simply sizing each font so its natural width matches —
+   since every line is centred anyway, the squeeze bought nothing but
+   complexity.
 5. **DPI pitfall.** The template is 192 DPI, so a point-based font
    renders twice as large as expected. All drawn text uses
    `GraphicsUnit.Pixel` to avoid the unit conversion entirely.

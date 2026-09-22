@@ -323,15 +323,14 @@ Movement rules:
 The four header lines are drawn by the scripts, defined once in
 `CertificateText.ps1`, which both scripts dot-source:
 
-| Name | Text | Font | Size | Y | Width |
-|------|------|------|------|---|-------|
-| Title | 1 HOUR TRACK RUN | Times New Roman Bold | 100 px | 70 | 818 |
-| SubTitle | Moonee Valley Athletics Centre | Arial Narrow | 46 px | 180 | 614 |
-| Host | Aberfeldie Masters Athletics | Times New Roman Italic | 38 px | 247 | 459 |
-| Date | 16 September 2026 | Arial Narrow | 32 px | 312 | 266 |
+| Name | Text | Font | Size | Y |
+|------|------|------|------|---|
+| Title | 1 HOUR TRACK RUN | Times New Roman Bold | 77 px | 70 |
+| SubTitle | Moonee Valley Athletics Centre | Arial Narrow | 51 px | 180 |
+| Host | Aberfeldie Masters Athletics | Times New Roman Italic | 38 px | 247 |
+| Date | 16 September 2026 | Arial Narrow | 34 px | 312 |
 
-Each line is centred horizontally and squeezed horizontally to `Width`
-to match the original baked text.
+Each line is centred horizontally and drawn at its natural width.
 
 ### Standard Certificate
 
