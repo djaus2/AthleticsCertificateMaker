@@ -214,64 +214,9 @@ foreach ($Participant in $Participants)
     $Graphics.TextRenderingHint =
         [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 
-    $LabelFont = New-Object System.Drawing.Font(
-        "Arial",
-        18,
-        [System.Drawing.FontStyle]::Regular
-    )
-
-    $NameFont = New-Object System.Drawing.Font(
-        "Arial",
-        20,
-        [System.Drawing.FontStyle]::Bold
-    )
-
-    $DistanceFont = New-Object System.Drawing.Font(
-        "Arial",
-        18,
-        [System.Drawing.FontStyle]::Bold
-    )
-
-    $TimeValueFont = New-Object System.Drawing.Font(
-        "Arial",
-        18,
-        [System.Drawing.FontStyle]::Bold
-    )
-
     $Brush = New-Object System.Drawing.SolidBrush(
         ([System.Drawing.Color]::FromArgb(0,20,90))
     )
-
-    #
-    # Certificate coordinates
-    # Three groups, equally spaced: label above value
-    #
-    $NameLabelY     = 1030
-    $NameY          = 1110
-    $DistanceLabelY = 1190
-    $DistanceY      = 1270
-    $TimeLabelY     = 1350
-    $TimeY          = 1430
-
-    $DistanceText = "$Distance metres"
-
-    $NameLabelSize = $Graphics.MeasureString("Name", $LabelFont)
-    $NameLabelX = ($Bitmap.Width - $NameLabelSize.Width) / 2
-
-    $NameSize = $Graphics.MeasureString($Name, $NameFont)
-    $NameX = ($Bitmap.Width - $NameSize.Width) / 2
-
-    $DistanceLabelSize = $Graphics.MeasureString("Distance", $LabelFont)
-    $DistanceLabelX = ($Bitmap.Width - $DistanceLabelSize.Width) / 2
-
-    $DistanceSize = $Graphics.MeasureString($DistanceText, $DistanceFont)
-    $DistanceX = ($Bitmap.Width - $DistanceSize.Width) / 2
-
-    $TimeLabelSize = $Graphics.MeasureString("Time", $LabelFont)
-    $TimeLabelX = ($Bitmap.Width - $TimeLabelSize.Width) / 2
-
-    $TimeSize = $Graphics.MeasureString($Time, $TimeValueFont)
-    $TimeX = ($Bitmap.Width - $TimeSize.Width) / 2
 
     #
     # Draw header text (defined in CertificateText.ps1)
@@ -299,61 +244,49 @@ foreach ($Participant in $Participants)
     }
 
     #
-    # Draw name
+    # Draw fields (defined in CertificateText.ps1)
     #
-    $Graphics.DrawString(
-        "Name",
-        $LabelFont,
-        $Brush,
-        $NameLabelX,
-        $NameLabelY
-    )
+    foreach ($field in $CertificateFields.Time) {
+        $labelFont = New-Object System.Drawing.Font(
+            $field.LabelFont,
+            $field.LabelSize,
+            [System.Drawing.FontStyle]($field.LabelStyle),
+            [System.Drawing.GraphicsUnit]::Pixel
+        )
 
-    $Graphics.DrawString(
-        $Name,
-        $NameFont,
-        $Brush,
-        $NameX,
-        $NameY
-    )
+        $valueFont = New-Object System.Drawing.Font(
+            $field.ValueFont,
+            $field.ValueSize,
+            [System.Drawing.FontStyle]($field.ValueStyle),
+            [System.Drawing.GraphicsUnit]::Pixel
+        )
 
-    #
-    # Draw distance
-    #
-    $Graphics.DrawString(
-        "Distance",
-        $LabelFont,
-        $Brush,
-        $DistanceLabelX,
-        $DistanceLabelY
-    )
+        $labelX = ($Bitmap.Width -
+            $Graphics.MeasureString($field.Label, $labelFont).Width) / 2
 
-    $Graphics.DrawString(
-        $DistanceText,
-        $DistanceFont,
-        $Brush,
-        $DistanceX,
-        $DistanceY
-    )
+        $value = "$($Participant.$($field.Name))$($field.Suffix)"
+        $valueX = ($Bitmap.Width -
+            $Graphics.MeasureString($value, $valueFont).Width) / 2
 
-    #
-    # Draw time
-    #
-    $Graphics.DrawString(
-        "Time",
-        $LabelFont,
-        $Brush,
-        $TimeLabelX,
-        $TimeLabelY
-    )
+        $Graphics.DrawString(
+            $field.Label,
+            $labelFont,
+            $Brush,
+            $labelX,
+            $field.LabelY
+        )
 
-    $Graphics.DrawString(
-        $Time,
-        $TimeValueFont,
-        $Brush,
-        $TimeX,
-        $TimeY
-    )
+        $Graphics.DrawString(
+            $value,
+            $valueFont,
+            $Brush,
+            $valueX,
+            $field.ValueY
+        )
+
+        $labelFont.Dispose()
+        $valueFont.Dispose()
+    }
 
     $SafeName = $Name -replace '[\\/:*?"<>|]', ''
 

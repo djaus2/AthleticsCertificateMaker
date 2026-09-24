@@ -321,7 +321,8 @@ Movement rules:
 ### Header text (both scripts)
 
 The four header lines are drawn by the scripts, defined once in
-`CertificateText.ps1`, which both scripts dot-source:
+`CertificateText.ps1`, which both scripts dot-source (see
+`CertificateText.md` for the full configuration reference):
 
 | Name | Text | Font | Size | Y |
 |------|------|------|------|---|
@@ -332,28 +333,23 @@ The four header lines are drawn by the scripts, defined once in
 
 Each line is centred horizontally and drawn at its natural width.
 
-### Standard Certificate
+### Field labels and values
 
-```powershell
-$NameLabelY     = 1050
-$NameY          = 1150
-$DistanceLabelY = 1265
-$DistanceY      = 1380
-```
+The Name/Distance (and Time) label–value pairs are also defined in
+`CertificateText.ps1`, as `$CertificateFields.Standard` and
+`$CertificateFields.Time`. Each entry carries the label text, the label
+and value fonts, and both Y positions:
 
-### TIME Certificate
+| Field | Label Y | Value Y |
+|-------|---------|---------|
+| Name (standard) | 1050 | 1150 |
+| Distance (standard) | 1265 | 1380 |
+| Name (time) | 1030 | 1110 |
+| Distance (time) | 1190 | 1270 |
+| Time (time) | 1350 | 1430 |
 
-All strings are centred horizontally. Each label sits 80 px above its
-value and the three groups are equally spaced:
-
-```powershell
-$NameLabelY     = 1030
-$NameY          = 1110
-$DistanceLabelY = 1190
-$DistanceY      = 1270
-$TimeLabelY     = 1350
-$TimeY          = 1430
-```
+Labels are Arial 18 regular; values are Arial bold (20 px for name,
+18 px for distance/time). The Distance value gets a ` metres` suffix.
 
 ---
 
