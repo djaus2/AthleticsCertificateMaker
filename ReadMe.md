@@ -17,6 +17,23 @@
   - `CertificateText.ps1` now also contains specifications of the certificate labels text and their values as well as fonts _(including font sizes)_ enabling general purpose use of the certificate generators.
 - As a 1 hour event, it is assumed that all athletes complete the 1 hour time. Where a time has been added for a participant, `GenerateCertificates.ps1` does not generate a certificate and does not send anything to those participants but they are included in the results along with their time. The script `GenerateCertificatesTIME.ps1` generates an alternative certificate including their time for those athletes and sends it along with the results; this is only for those with a time.
 
+# Recent Update
+Moved the following to CertificateText.ps1 from the gnerate scripts.
+```powershell
+#  Use CertificateTemplateBlank.png instead of the default CertificateTemplate.png 
+#  ... if you want create a new certificate and add a new background image to that.
+#
+#$CertificateTemplateFile = "CertificateTemplateBlank.png" <--This has been created which is blank except for a frame.
+$CertificateTemplateFile = "CertificateTemplate.png"
+
+$ParticipantSpreadsheetFile = "results.xlsx"
+$SendUsingAccount = "account@location.com.au"
+$CertificateTextColor = @(0, 20, 90)
+$CertificateSmoothingMode = "HighQuality"
+$CertificateTextRenderingHint = "AntiAliasGridFit"
+```
+
+
 This project generates:
 
 - Participant certificate PNG files
