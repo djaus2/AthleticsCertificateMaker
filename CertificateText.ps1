@@ -6,7 +6,7 @@
 # To change the event wording, edit Text here once - both scripts pick it up.
 #
 #  Use CertificateTemplateBlank.png instead of the default CertificateTemplate.png 
-#  ... if you want create a new certificate and add a new background image to that.
+#  ... if you want to create a new certificate for a new event and so add a new background image to that.
 #
 #$CertificateTemplateFile = "CertificateTemplateBlank.png"
 $CertificateTemplateFile = "CertificateTemplate.png"
