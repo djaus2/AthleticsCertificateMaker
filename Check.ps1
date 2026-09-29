@@ -1,4 +1,5 @@
 $BaseFolder = "C:\Certificates"
+. (Join-Path $PSScriptRoot "CertificateText.ps1")
 
 Write-Host ""
 Write-Host "=== Certificate System Validation ===" -ForegroundColor Cyan
@@ -22,8 +23,8 @@ function Test-ItemExists {
 }
 
 # Required files
-$ExcelFile = Join-Path $BaseFolder "Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx"
-$TemplateFile = Join-Path $BaseFolder "CertificateTemplate.png"
+$ExcelFile = Join-Path $BaseFolder $ParticipantSpreadsheetFile
+$TemplateFile = Join-Path $BaseFolder $CertificateTemplateFile
 $ScriptFile = Join-Path $BaseFolder "Send-Certificates.ps1"
 
 Test-ItemExists $ExcelFile "Results spreadsheet"

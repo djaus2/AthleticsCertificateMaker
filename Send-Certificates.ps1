@@ -1,8 +1,9 @@
 Import-Module ImportExcel
 
 $RootFolder = "C:\Certificates"
+. (Join-Path $PSScriptRoot "CertificateText.ps1")
 
-$ExcelFile = Join-Path $RootFolder "Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx"
+$ExcelFile = Join-Path $RootFolder $ParticipantSpreadsheetFile
 
 $PngFolder = Join-Path $RootFolder "Output\PNG"
 

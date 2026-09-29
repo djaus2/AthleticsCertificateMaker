@@ -94,14 +94,10 @@ if (-not $SendEnabled -and -not $SaveEnabled) {
 
 $RootFolder = (Get-Location).Path
 
-# Outlook account to send from
-$SendUsingAccount = "account@location.com.au"
-
-$ExcelFile = Join-Path $RootFolder "Resultsentrants-aberfeldie-one-hour-track-challenge.xlsx"
-$TemplateFile = Join-Path $RootFolder "CertificateTemplate.png"
-
 # Header text definitions shared by both scripts (title, subtitle, host, date)
 . (Join-Path $PSScriptRoot "CertificateText.ps1")
+$ExcelFile = Join-Path $RootFolder $ParticipantSpreadsheetFile
+$TemplateFile = Join-Path $RootFolder $CertificateTemplateFile
 
 $PngFolder = Join-Path $RootFolder "Output\PNG_TIME"
 $ResultsFolder = Join-Path $RootFolder "Results"
@@ -209,13 +205,13 @@ foreach ($Participant in $Participants)
     $Graphics = [System.Drawing.Graphics]::FromImage($Bitmap)
 
     $Graphics.SmoothingMode =
-        [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+        [System.Drawing.Drawing2D.SmoothingMode]$CertificateSmoothingMode
 
     $Graphics.TextRenderingHint =
-        [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
+        [System.Drawing.Text.TextRenderingHint]$CertificateTextRenderingHint
 
     $Brush = New-Object System.Drawing.SolidBrush(
-        ([System.Drawing.Color]::FromArgb(0,20,90))
+        ([System.Drawing.Color]::FromArgb($CertificateTextColor[0], $CertificateTextColor[1], $CertificateTextColor[2]))
     )
 
     #

@@ -1,12 +1,31 @@
 # CertificateText.ps1 — Certificate Text Configuration
 
-`CertificateText.ps1` is a shared configuration file, dot-sourced by both
-`GenerateCertificates.ps1` and `GenerateCertificatesTIME.ps1`. Every piece
-of text drawn on the certificate — header lines and participant fields —
-is defined here, so nothing needs editing inside the scripts themselves.
+`CertificateText.ps1` is a shared configuration file used by the certificate
+generation and mail scripts. Certificate wording, presentation, input
+spreadsheet filename, and sending account are defined here.
 
 To change wording, fonts or positions, edit this file once and both
 scripts pick it up on the next run.
+
+## Certificate template image
+
+Set `$CertificateTemplateFile` to the PNG filename in the certificate
+folder. Both generation scripts and `Check.ps1` use this setting. The
+participant spreadsheet filename is shared by the generation scripts,
+`Check.ps1`, and `Send-Certificates.ps1`. `$SendUsingAccount` configures the
+sender account for both generation scripts; `Send-Certificates.ps1` continues
+to use Outlook's default account.
+
+```powershell
+$CertificateTemplateFile = "CertificateTemplate.png"
+$ParticipantSpreadsheetFile = "results.xlsx"
+$SendUsingAccount = "account@location.com.au"
+$CertificateTextColor = @(0, 20, 90) # RGB
+$CertificateSmoothingMode = "HighQuality"
+$CertificateTextRenderingHint = "AntiAliasGridFit"
+```
+
+The text color and rendering settings are shared by both generation scripts.
 
 ---
 

@@ -1,10 +1,22 @@
 #
-# Certificate header text definitions.
-# Dot-sourced by GenerateCertificates.ps1 and GenerateCertificatesTIME.ps1.
+# Shared certificate and event settings.
+# Dot-sourced by the certificate generation and mail scripts.
 #
 # Each item is drawn centred horizontally at Y, at its natural width.
 # To change the event wording, edit Text here once - both scripts pick it up.
 #
+#  Use CertificateTemplateBlank.png instead of the default CertificateTemplate.png 
+#  ... if you want create a new certificate and add a new background image to that.
+#
+#$CertificateTemplateFile = "CertificateTemplateBlank.png"
+$CertificateTemplateFile = "CertificateTemplate.png"
+
+$ParticipantSpreadsheetFile = "results.xlsx"
+$SendUsingAccount = "account@location.com.au"
+$CertificateTextColor = @(0, 20, 90)
+$CertificateSmoothingMode = "HighQuality"
+$CertificateTextRenderingHint = "AntiAliasGridFit"
+
 $CertificateText = @(
     @{
         Name  = "Title"
