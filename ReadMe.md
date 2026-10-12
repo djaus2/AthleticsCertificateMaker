@@ -9,6 +9,7 @@
 
 > Coming: csv entry of 
 results. Removes need for Excel and active printer!
+> Also colors of all text individually configurable
 
 ## Blog posts
 
