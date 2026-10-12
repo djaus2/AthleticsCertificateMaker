@@ -6,6 +6,10 @@
 >
 > [004-Fred Nurk.png](<https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png>)
 
+
+> Coming: csv entry of 
+results. Removes need for Excel and active printer!
+
 ## Blog posts
 
 - [davidjones.sportronics.com.au-certs/](https://davidjones.sportronics.com.au/search.html?query=Athletics+AND+Certificate)
