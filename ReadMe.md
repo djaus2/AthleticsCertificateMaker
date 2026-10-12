@@ -7,8 +7,9 @@
 > [004-Fred Nurk.png](<https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png>)
 
 
-> Coming: csv entry of 
+> **Coming:** csv entry of 
 results. Removes need for Excel and active printer!
+
 > Also colors of all text individually configurable
 
 ## Blog posts
