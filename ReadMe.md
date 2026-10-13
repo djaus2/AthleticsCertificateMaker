@@ -7,7 +7,7 @@
 > [004-Fred Nurk.png](<https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png>)
 
 
-> **Coming:** csv entry of 
+> **New:** csv entry of 
 results. Removes need for Excel and active printer!
 
 > Certificate text fonts, colors, sizes, and positions are configurable.
@@ -30,6 +30,31 @@ results. Removes need for Excel and active printer!
 # Recent Update
 
 `CertificateText.ps1` now controls the fonts, colors, sizes, and vertical positions of the header text and participant labels and values. Both certificate scripts use this shared configuration.
+
+## Previous Updates:
+Moved the following to CertificateText.ps1 from the generate scripts.
+
+```powershell
+#  Use CertificateTemplateBlank.png instead of the default CertificateTemplate.png 
+#  ... if you want create a new certificate and add a new background image to that.
+#
+#$CertificateTemplateFile = "CertificateTemplateBlank.png" <--This has been created which is blank except for a frame.
+$CertificateTemplateFile = "CertificateTemplate.png"
+
+$ParticipantCsvFile = "results.csv"
+$SendUsingAccount = "account@location.com.au"
+$CertificateTextColor = @(0, 20, 90)
+$CertificateSmoothingMode = "HighQuality"
+$CertificateTextRenderingHint = "AntiAliasGridFit"
+```
+
+This project generates:
+
+- Participant certificate PNG files
+- Event results PDF
+- Outlook email drafts with appropriate attachments
+
+The workflow wass designed for the Aberfeldie Masters Athletics 1 Hour Track Run but has been adapted for similar events.
 
 This project generates:
 
