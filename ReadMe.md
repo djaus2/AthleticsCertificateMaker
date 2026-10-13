@@ -10,13 +10,14 @@
 > **Coming:** csv entry of 
 results. Removes need for Excel and active printer!
 
-> Also colors of all text individually configurable
+> Certificate text fonts, colors, sizes, and positions are configurable.
 
 ## Blog posts
 
 - [davidjones.sportronics.com.au-certs/](https://davidjones.sportronics.com.au/search.html?query=Athletics+AND+Certificate)
 - There is now a generalised "How-to' in those blog posts:
   [How to generate a custom certificate](https://davidjones.sportronics.com.au/appdev/Athletics_Certificate_Generator-How_To-appdev.html)
+- [Customizing fonts, colors and positions of text](https://davidjones.sportronics.com.au/appdev/Athletics_Certificate_Generator-Customnising_fonts,_colors_and_postions_of_text-appdev.html)
 
 # Background
 
@@ -28,21 +29,7 @@ results. Removes need for Excel and active printer!
 
 # Recent Update
 
-Moved the following to CertificateText.ps1 from the generate scripts.
-
-```powershell
-#  Use CertificateTemplateBlank.png instead of the default CertificateTemplate.png 
-#  ... if you want create a new certificate and add a new background image to that.
-#
-#$CertificateTemplateFile = "CertificateTemplateBlank.png" <--This has been created which is blank except for a frame.
-$CertificateTemplateFile = "CertificateTemplate.png"
-
-$ParticipantCsvFile = "results.csv"
-$SendUsingAccount = "account@location.com.au"
-$CertificateTextColor = @(0, 20, 90)
-$CertificateSmoothingMode = "HighQuality"
-$CertificateTextRenderingHint = "AntiAliasGridFit"
-```
+`CertificateText.ps1` now controls the fonts, colors, sizes, and vertical positions of the header text and participant labels and values. Both certificate scripts use this shared configuration.
 
 This project generates:
 
@@ -669,5 +656,5 @@ The public results are also written to `Results/OfficialResults.csv`.
 
 # To Do
 
-- Parameterise these scripts so that this package can have simple reuse for slightly different contexts.
-- Parameterise the script-drawn strings ($Title, $Subtitle, $HostText, $DateText) so a different event can be configured without editing the drawing code.
+- Parameterize these scripts so that this package can have simple reuse for slightly different contexts.
+- Parameterize the script-drawn strings ($Title, $Subtitle, $HostText, $DateText) so a different event can be configured without editing the drawing code.
