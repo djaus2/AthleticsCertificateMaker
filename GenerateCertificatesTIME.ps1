@@ -1,3 +1,5 @@
+$CertificateTextDefinitionFile = "CertificateText.ps1"
+
 Add-Type -AssemblyName System.Drawing
 
 $ErrorActionPreference = "Stop"
@@ -94,7 +96,7 @@ if (-not $SendEnabled -and -not $SaveEnabled) {
 $RootFolder = (Get-Location).Path
 
 # Header text definitions shared by both scripts (title, subtitle, host, date)
-. (Join-Path $PSScriptRoot "CertificateText.ps1")
+. (Join-Path $PSScriptRoot $CertificateTextDefinitionFile)
 . (Join-Path $PSScriptRoot "Export-ResultsPdf.ps1")
 $CsvFile = Join-Path $RootFolder $ParticipantCsvFile
 $TemplateFile = Join-Path $RootFolder $CertificateTemplateFile
