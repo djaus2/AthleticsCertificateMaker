@@ -1,9 +1,7 @@
-Import-Module ImportExcel
-
 $RootFolder = "C:\Certificates"
 . (Join-Path $PSScriptRoot "CertificateText.ps1")
 
-$ExcelFile = Join-Path $RootFolder $ParticipantSpreadsheetFile
+$CsvFile = Join-Path $RootFolder $ParticipantCsvFile
 
 $PngFolder = Join-Path $RootFolder "Output\PNG"
 
@@ -17,7 +15,7 @@ if (-not (Test-Path $ResultsPdf))
     exit
 }
 
-$Participants = Import-Excel $ExcelFile
+$Participants = Import-Csv $CsvFile
 
 $Outlook = New-Object -ComObject Outlook.Application
 
@@ -25,16 +23,16 @@ foreach ($Participant in $Participants)
 {
     $Number   = $Participant.No
     $Name     = [string]$Participant.Name
-    $Email    = [string]$Participant.'Email Address'
+    $Email    = [string]$Participant.Email
     $Distance = [string]$Participant.Distance
     $Time     = [string]$Participant.Time
 
-    if (:IsNullOrWhiteSpace($Name))
+    if ([string]::IsNullOrWhiteSpace($Name))
     {
         continue
     }
 
-    if (:IsNullOrWhiteSpace($Email))
+    if ([string]::IsNullOrWhiteSpace($Email))
     {
         Write-Host "Skipping $Name - no email address" `
             -ForegroundColor Yellow
@@ -45,7 +43,7 @@ foreach ($Participant in $Participants)
     # Timed result
     # Send nothing
     #
-    if (-not :IsNullOrWhiteSpace($Time))
+    if (-not [string]::IsNullOrWhiteSpace($Time))
     {
         Write-Host "Skipping $Name - timed result ($Time)" `
             -ForegroundColor Yellow

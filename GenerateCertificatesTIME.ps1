@@ -1,4 +1,3 @@
-Import-Module ImportExcel
 Add-Type -AssemblyName System.Drawing
 
 $ErrorActionPreference = "Stop"
@@ -96,13 +95,14 @@ $RootFolder = (Get-Location).Path
 
 # Header text definitions shared by both scripts (title, subtitle, host, date)
 . (Join-Path $PSScriptRoot "CertificateText.ps1")
-$ExcelFile = Join-Path $RootFolder $ParticipantSpreadsheetFile
+. (Join-Path $PSScriptRoot "Export-ResultsPdf.ps1")
+$CsvFile = Join-Path $RootFolder $ParticipantCsvFile
 $TemplateFile = Join-Path $RootFolder $CertificateTemplateFile
 
 $PngFolder = Join-Path $RootFolder "Output\PNG_TIME"
 $ResultsFolder = Join-Path $RootFolder "Results"
 
-$ResultsXlsx = Join-Path $ResultsFolder "OfficialResults.xlsx"
+$ResultsCsv = Join-Path $ResultsFolder "OfficialResults.csv"
 $ResultsPdf = Join-Path $ResultsFolder "Aberfeldie-1-Hour-Track-Run-Results-2026.pdf"
 
 New-Item -ItemType Directory -Force -Path $PngFolder | Out-Null
@@ -110,7 +110,7 @@ New-Item -ItemType Directory -Force -Path $ResultsFolder | Out-Null
 
 Write-Host "Loading participants..." -ForegroundColor Cyan
 
-$Participants = Import-Excel $ExcelFile
+$Participants = Import-Csv $CsvFile
 
 $Participants = $Participants | Where-Object {
     -not [string]::IsNullOrWhiteSpace($_.Name)
@@ -119,37 +119,14 @@ $Participants = $Participants | Where-Object {
 Write-Host "Participants found: $($Participants.Count)"
 
 #
-# Create Results Workbook (without email addresses)
+# Create public results files (without email addresses)
 #
-$Participants |
-    Select-Object No, Name, Distance, Time |
-    Export-Excel `
-        $ResultsXlsx `
-        -WorksheetName Results `
-        -AutoSize `
-        -ClearSheet
+$OfficialResults = @($Participants | Select-Object No, Name, Distance, Time)
+$OfficialResults |
+    Export-Csv $ResultsCsv -NoTypeInformation -Encoding UTF8
 
 Write-Host "Creating PDF results file..." -ForegroundColor Cyan
-
-$Excel = New-Object -ComObject Excel.Application
-$Excel.Visible = $false
-$Excel.DisplayAlerts = $false
-
-$Workbook = $Excel.Workbooks.Open($ResultsXlsx)
-
-$Workbook.ExportAsFixedFormat(
-    0,
-    $ResultsPdf
-)
-
-$Workbook.Close($false)
-$Excel.Quit()
-
-[System.Runtime.InteropServices.Marshal]::ReleaseComObject($Workbook) | Out-Null
-[System.Runtime.InteropServices.Marshal]::ReleaseComObject($Excel) | Out-Null
-
-[System.GC]::Collect()
-[System.GC]::WaitForPendingFinalizers()
+Export-ResultsPdf -Data $OfficialResults -Path $ResultsPdf
 
 Write-Host "Results PDF created." -ForegroundColor Green
 
@@ -210,14 +187,18 @@ foreach ($Participant in $Participants)
     $Graphics.TextRenderingHint =
         [System.Drawing.Text.TextRenderingHint]$CertificateTextRenderingHint
 
-    $Brush = New-Object System.Drawing.SolidBrush(
-        ([System.Drawing.Color]::FromArgb($CertificateTextColor[0], $CertificateTextColor[1], $CertificateTextColor[2]))
+    $DefaultBrush = New-Object System.Drawing.SolidBrush(
+        ([System.Drawing.Color]::FromName($DefaultTextColor))
     )
 
     #
     # Draw header text (defined in CertificateText.ps1)
     #
     foreach ($item in $CertificateText) {
+        $ItemBrush = New-Object System.Drawing.SolidBrush(
+            ([System.Drawing.Color]::FromName([string]$item.Color))
+        )
+
         $font = New-Object System.Drawing.Font(
             $item.Font,
             $item.Size,
@@ -231,18 +212,29 @@ foreach ($Participant in $Participants)
         $Graphics.DrawString(
             $item.Text,
             $font,
-            $Brush,
+            $ItemBrush,
             $textX,
             $item.Y
         )
 
         $font.Dispose()
+    $ItemBrush.Dispose()
     }
 
     #
     # Draw fields (defined in CertificateText.ps1)
     #
     foreach ($field in $CertificateFields.Time) {
+        $labelColorName = if ($field.LabelColor) { [string]$field.LabelColor } elseif ($DefaultLabelColor) { [string]$DefaultLabelColor } else { $DefaultTextColor }
+        $valueColorName = if ($field.ValueColor) { [string]$field.ValueColor } elseif ($DefaultValueColor) { [string]$DefaultValueColor } else { $DefaultTextColor }
+
+        $labelBrush = New-Object System.Drawing.SolidBrush(
+            ([System.Drawing.Color]::FromName($labelColorName))
+        )
+        $valueBrush = New-Object System.Drawing.SolidBrush(
+            ([System.Drawing.Color]::FromName($valueColorName))
+        )
+
         $labelFont = New-Object System.Drawing.Font(
             $field.LabelFont,
             $field.LabelSize,
@@ -267,7 +259,7 @@ foreach ($Participant in $Participants)
         $Graphics.DrawString(
             $field.Label,
             $labelFont,
-            $Brush,
+            $labelBrush,
             $labelX,
             $field.LabelY
         )
@@ -275,14 +267,18 @@ foreach ($Participant in $Participants)
         $Graphics.DrawString(
             $value,
             $valueFont,
-            $Brush,
+            $valueBrush,
             $valueX,
             $field.ValueY
         )
 
         $labelFont.Dispose()
         $valueFont.Dispose()
+        $labelBrush.Dispose()
+        $valueBrush.Dispose()
     }
+
+    $DefaultBrush.Dispose()
 
     $SafeName = $Name -replace '[\\/:*?"<>|]', ''
 

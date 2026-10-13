@@ -9,11 +9,18 @@
 #  ... if you want to create a new certificate for a new event and so add a new background image to that.
 #
 #$CertificateTemplateFile = "CertificateTemplateBlank.png"
-$CertificateTemplateFile = "CertificateTemplate.png"
+$CertificateTemplateFile = "DoncasterCertificateTemplate2.png"
 
-$ParticipantSpreadsheetFile = "results.xlsx"
-$SendUsingAccount = "account@location.com.au"
-$CertificateTextColor = @(0, 20, 90)
+$ParticipantCsvFile = "results.csv"
+$SendUsingAccount = "djaus@sportronics.com.au"
+
+$DefaultTextColor = "Red"
+$DefaultLabelColor = "LightGreen"
+$DefaultValueColor = "Yellow"
+
+$DefaultLabelTextSize = 70
+$DefaultDataTextSize = 90
+
 $CertificateSmoothingMode = "HighQuality"
 $CertificateTextRenderingHint = "AntiAliasGridFit"
 
@@ -21,34 +28,38 @@ $CertificateText = @(
     @{
         Name  = "Title"
         Text  = "1 HOUR TRACK RUN"
+        Color = $DefaultTextColor
         Font  = "Times New Roman"
-        Size  = 77
+        Size  = 90
         Style = "Bold"
         Y     = 70
     }
     @{
         Name  = "SubTitle"
-        Text  = "Moonee Valley Athletics Centre"
+        Text  = "Doncaster Athletics Centre"
+        Color = "White"
         Font  = "Arial Narrow"
-        Size  = 51
+        Size  = 38
         Style = "Regular"
-        Y     = 180
+        Y     = 340
     }
     @{
         Name  = "Host"
-        Text  = "Aberfeldie Masters Athletics"
+        Text  = ""
+        Color = $DefaultTextColor
         Font  = "Times New Roman"
         Size  = 38
         Style = "Italic"
-        Y     = 247
+        Y     = 360
     }
     @{
         Name  = "Date"
-        Text  = "16 September 2026"
+        Text  = "5th October 2026"
+        Color = "LightGreen"
         Font  = "Arial Narrow"
-        Size  = 34
+        Size  = 51
         Style = "Regular"
-        Y     = 312
+        Y     = 410
     }
 )
 
@@ -63,40 +74,39 @@ $CertificateText = @(
 # Suffix = appended to the value if present (e.g. " metres")
 #
 # Shared font size for all field labels and values - change once here.
-# To size values differently from labels, set a +/- ValueSizeDelta.
 #
-$LabelValueSize = 48
-$ValueSizeDelta = 0
 
-$FieldLabelSize = $LabelValueSize
-$FieldValueSize = $LabelValueSize + $ValueSizeDelta
 
 $CertificateFields = @{
     Standard = @(
         @{
             Name       = "Name"
-            Label      = "Name"
+            Label      = "Name:"
             LabelFont  = "Arial"
-            LabelSize  = $FieldLabelSize
+            LabelSize  = $DefaultLabelTextSize
             LabelStyle = "Bold"
-            LabelY     = 1050
+            LabelColor = $DefaultLabelColor
+            LabelY     = 800
             ValueFont  = "Arial"
-            ValueSize  = $FieldValueSize
+            ValueSize  = $DefaultDataTextSize
             ValueStyle = "Regular"
-            ValueY     = 1150
+            ValueColor = $DefaultValueColor
+            ValueY     = 900
         }
         @{
             Name       = "Distance"
             Label      = "Distance"
             Suffix     = " metres"
             LabelFont  = "Arial"
-            LabelSize  = $FieldLabelSize
+            LabelSize  = $DefaultLabelTextSize
             LabelStyle = "Bold"
-            LabelY     = 1265
+            LabelColor = $DefaultLabelColor
+            LabelY     = 1100
             ValueFont  = "Arial"
-            ValueSize  = $FieldValueSize
+            ValueSize  = $DefaultDataTextSize
             ValueStyle = "Regular"
-            ValueY     = 1380
+            ValueColor = $DefaultValueColor
+            ValueY     = 1200
         }
     )
     Time = @(
@@ -104,38 +114,44 @@ $CertificateFields = @{
             Name       = "Name"
             Label      = "Name"
             LabelFont  = "Arial"
-            LabelSize  = $FieldLabelSize
+            LabelSize  = $DefaultLabelTextSize
             LabelStyle = "Bold"
-            LabelY     = 1030
+            LabelColor = $DefaultLabelColor
+            LabelY     = 800
             ValueFont  = "Arial"
-            ValueSize  = $FieldValueSize
+            ValueSize  = $DefaultDataTextSize
             ValueStyle = "Regular"
-            ValueY     = 1110
+            ValueColor = $DefaultValueColor
+            ValueY     = 900
         }
         @{
             Name       = "Distance"
             Label      = "Distance"
             Suffix     = " metres"
             LabelFont  = "Arial"
-            LabelSize  = $FieldLabelSize
+            LabelSize  = $DefaultLabelTextSize
             LabelStyle = "Bold"
-            LabelY     = 1190
+            LabelColor = $DefaultLabelColor
+            LabelY     = 1050
             ValueFont  = "Arial"
-            ValueSize  = $FieldValueSize
+            ValueSize  = $DefaultDataTextSize
             ValueStyle = "Regular"
-            ValueY     = 1270
+            ValueColor = $DefaultValueColor
+            ValueY     = 1150
         }
         @{
             Name       = "Time"
             Label      = "Time"
             LabelFont  = "Arial"
-            LabelSize  = $FieldLabelSize
+            LabelSize  = $DefaultLabelTextSize
             LabelStyle = "Bold"
-            LabelY     = 1350
+            LabelColor = $DefaultLabelColor
+            LabelY     = 1300
             ValueFont  = "Arial"
-            ValueSize  = $FieldValueSize
+            ValueSize  = $DefaultDataTextSize
             ValueStyle = "Regular"
-            ValueY     = 1430
+            ValueColor = $DefaultValueColor
+            ValueY     = 1400
         }
     )
 }

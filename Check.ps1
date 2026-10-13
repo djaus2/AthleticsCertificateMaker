@@ -23,13 +23,27 @@ function Test-ItemExists {
 }
 
 # Required files
-$ExcelFile = Join-Path $BaseFolder $ParticipantSpreadsheetFile
+$CsvFile = Join-Path $BaseFolder $ParticipantCsvFile
 $TemplateFile = Join-Path $BaseFolder $CertificateTemplateFile
 $ScriptFile = Join-Path $BaseFolder "Send-Certificates.ps1"
 
-Test-ItemExists $ExcelFile "Results spreadsheet"
+Test-ItemExists $CsvFile "Participant CSV"
 Test-ItemExists $TemplateFile "Certificate template PNG"
 Test-ItemExists $ScriptFile "Certificate mail script"
+
+$EdgeCandidates = @(
+    (Join-Path $env:ProgramFiles "Microsoft\Edge\Application\msedge.exe"),
+    (Join-Path ${env:ProgramFiles(x86)} "Microsoft\Edge\Application\msedge.exe")
+)
+if ($EdgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1)
+{
+    Write-Host "[OK] Microsoft Edge available for PDF generation" -ForegroundColor Green
+}
+else
+{
+    Write-Host "[ERROR] Microsoft Edge is required for PDF generation" -ForegroundColor Red
+    $Errors++
+}
 
 # Required folders
 $OutputFolder = Join-Path $BaseFolder "Output"
@@ -52,37 +66,21 @@ foreach ($Folder in @($OutputFolder, $PngFolder, $PdfFolder, $LogsFolder))
 
 Write-Host ""
 
-# Check ImportExcel
-if (Get-Module -ListAvailable ImportExcel)
-{
-    Write-Host "[OK] ImportExcel module installed" -ForegroundColor Green
-}
-else
-{
-    Write-Host "[ERROR] ImportExcel module NOT installed" -ForegroundColor Red
-    Write-Host "        Run: Install-Module ImportExcel -Scope CurrentUser"
-    $Errors++
-}
-
-Write-Host ""
-
-# Validate spreadsheet
-if (Test-Path $ExcelFile)
+# Validate participant CSV
+if (Test-Path $CsvFile)
 {
     try
     {
-        Import-Module ImportExcel -ErrorAction Stop
-
-        $Data = Import-Excel $ExcelFile
+        $Data = @(Import-Csv $CsvFile -ErrorAction Stop)
 
         if ($Data.Count -eq 0)
         {
-            Write-Host "[ERROR] Spreadsheet contains no rows" -ForegroundColor Red
+            Write-Host "[ERROR] CSV contains no rows" -ForegroundColor Red
             $Errors++
         }
         else
         {
-            Write-Host "[OK] Spreadsheet contains $($Data.Count) entrants" -ForegroundColor Green
+            Write-Host "[OK] CSV contains $($Data.Count) entrants" -ForegroundColor Green
         }
 
         $FirstRow = $Data | Select-Object -First 1
@@ -111,7 +109,7 @@ if (Test-Path $ExcelFile)
     }
     catch
     {
-        Write-Host "[ERROR] Unable to read spreadsheet"
+        Write-Host "[ERROR] Unable to read participant CSV"
         Write-Host $_.Exception.Message
         $Errors++
     }

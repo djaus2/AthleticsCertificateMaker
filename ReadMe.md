@@ -31,7 +31,7 @@ Moved the following to CertificateText.ps1 from the generate scripts.
 #$CertificateTemplateFile = "CertificateTemplateBlank.png" <--This has been created which is blank except for a frame.
 $CertificateTemplateFile = "CertificateTemplate.png"
 
-$ParticipantSpreadsheetFile = "results.xlsx"
+$ParticipantCsvFile = "results.csv"
 $SendUsingAccount = "account@location.com.au"
 $CertificateTextColor = @(0, 20, 90)
 $CertificateSmoothingMode = "HighQuality"
@@ -150,7 +150,7 @@ ignored:
 The process consists of:
 
 1. Preparing the certificate background image.
-2. Maintaining the participant spreadsheet.
+2. Maintaining the participant CSV file.
 3. Running the appropriate certificate generation script.
 4. Reviewing generated certificates and email drafts.
 5. Sending approved emails from Outlook.
@@ -401,9 +401,9 @@ Common adjustments:
 
 ---
 
-# Spreadsheet Format
+# CSV Format
 
-The spreadsheet must contain the following columns.
+The `results.csv` file must contain the following columns.
 
 | Column   | Required |
 | -------- | -------- |
@@ -642,23 +642,12 @@ a warning is displayed and the default Outlook account is used.
 
 ---
 
-# Excel / Printer Requirement
+# PDF Generation Requirement
 
-Although nothing is printed, Excel PDF generation may require a valid printer driver.
+Microsoft Edge is used in headless mode to create the results PDF. Excel and a
+printer driver are not required.
 
-Recommended:
-
-```text
-Microsoft Print to PDF
-```
-
-or any installed printer.
-
-Symptoms of a missing printer include:
-
-- PDF generation failures
-- Export errors
-- Worksheet rendering issues
+The public results are also written to `Results/OfficialResults.csv`.
 
 ---
 

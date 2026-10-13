@@ -1,8 +1,8 @@
 # CertificateText.ps1 — Certificate Text Configuration
 
 `CertificateText.ps1` is a shared configuration file used by the certificate
-generation and mail scripts. Certificate wording, presentation, input
-spreadsheet filename, and sending account are defined here.
+generation and mail scripts. Certificate wording, presentation, input CSV
+filename, and sending account are defined here.
 
 To change wording, fonts or positions, edit this file once and both
 scripts pick it up on the next run.
@@ -11,14 +11,14 @@ scripts pick it up on the next run.
 
 Set `$CertificateTemplateFile` to the PNG filename in the certificate
 folder. Both generation scripts and `Check.ps1` use this setting. The
-participant spreadsheet filename is shared by the generation scripts,
+participant CSV filename is shared by the generation scripts,
 `Check.ps1`, and `Send-Certificates.ps1`. `$SendUsingAccount` configures the
 sender account for both generation scripts; `Send-Certificates.ps1` continues
 to use Outlook's default account.
 
 ```powershell
 $CertificateTemplateFile = "CertificateTemplate.png"
-$ParticipantSpreadsheetFile = "results.xlsx"
+$ParticipantCsvFile = "results.csv"
 $SendUsingAccount = "account@location.com.au"
 $CertificateTextColor = @(0, 20, 90) # RGB
 $CertificateSmoothingMode = "HighQuality"
@@ -80,23 +80,25 @@ Each entry:
     Label      = "Distance"       # text drawn above the value
     Suffix     = " metres"        # appended to the value (optional)
     LabelFont  = "Arial"
-    LabelSize  = $FieldLabelSize
+    LabelSize  = $DefaultLabelTextSize
     LabelStyle = "Bold"
+    LabelColor = $DefaultLabelColor
     LabelY     = 1265
     ValueFont  = "Arial"
-    ValueSize  = $FieldValueSize
+    ValueSize  = $DefaultDataTextSize
     ValueStyle = "Regular"
+    ValueColor = $DefaultValueColor
     ValueY     = 1380
 }
 ```
 
 | Key | Meaning |
 |-----|---------|
-| `Name` | Participant column read from the spreadsheet (`No`, `Name`, `Distance`, `Time`) |
+| `Name` | Participant column read from the CSV (`No`, `Name`, `Distance`, `Time`) |
 | `Label` | The small text drawn above the value |
 | `Suffix` | Optional text appended to the value (e.g. `" metres"`) |
-| `LabelFont` / `LabelSize` / `LabelStyle` / `LabelY` | Label font, size, style and position |
-| `ValueFont` / `ValueSize` / `ValueStyle` / `ValueY` | Value font, size, style and position |
+| `LabelFont` / `LabelSize` / `LabelStyle` / `LabelColor` / `LabelY` | Label font, size, style, color and position |
+| `ValueFont` / `ValueSize` / `ValueStyle` / `ValueColor` / `ValueY` | Value font, size, style, color and position |
 
 Current positions:
 
