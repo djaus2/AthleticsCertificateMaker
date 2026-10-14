@@ -112,18 +112,31 @@ New-Item -ItemType Directory -Force -Path $ResultsFolder | Out-Null
 
 Write-Host "Loading participants..." -ForegroundColor Cyan
 
-$Participants = Import-Csv $CsvFile
+$CurrentHeading = ""
+$Participants = @(
+    foreach ($ParticipantRow in (Import-ParticipantCsv $CsvFile)) {
+        $RowNumber = [string]$ParticipantRow.No
+        if ($RowNumber.StartsWith('$')) {
+            $CurrentHeading = $RowNumber.Substring(1).Trim()
+            continue
+        }
 
-$Participants = $Participants | Where-Object {
-    -not [string]::IsNullOrWhiteSpace($_.Name)
-}
+        if ([string]::IsNullOrWhiteSpace($ParticipantRow.Name)) {
+            continue
+        }
+
+        $ParticipantRow |
+            Add-Member -NotePropertyName Heading -NotePropertyValue $CurrentHeading -Force
+        $ParticipantRow
+    }
+)
 
 Write-Host "Participants found: $($Participants.Count)"
 
 #
 # Create public results files WITHOUT email addresses
 #
-$OfficialResults = @($Participants | Select-Object No, Name, Distance, Time)
+$OfficialResults = @($Participants | Select-Object No, Heading, Name, Distance, Time)
 $OfficialResults |
     Export-Csv $ResultsCsv -NoTypeInformation -Encoding UTF8
 
@@ -236,18 +249,12 @@ foreach ($Participant in $Participants)
             Write-Host "Number of attachments: $($Mail.Attachments.Count)" `
                 -ForegroundColor DarkGreen  -BackgroundColor Yellow
 
-            Write-Host "Saving results email draft..." `
+            Write-Host "Sending results email..." `
                 -ForegroundColor DarkGreen  -BackgroundColor Yellow
 
-            # For testing: make changes to GenerateCertificates.ps1 then run.
-            # Emails will be saved to the Drafts folder only.
-            # To actually send automatically on generation uncomment the following line:
-            #$Mail.Send()
+            $Mail.Send()
 
-            # Save the email to the draft folder without sending it
-            $Mail.Save()
-
-            Write-Host "Results email draft saved." `
+            Write-Host "Results email sent." `
                 -ForegroundColor DarkGreen  -BackgroundColor Yellow
 
             Write-Host "Results email processing complete." `
@@ -277,6 +284,12 @@ foreach ($Participant in $Participants)
     # Draw header text (defined in CertificateText.ps1)
     #
     foreach ($item in $CertificateText) {
+        $HeaderText = [string]$item.Text
+        if ($item.Name -eq "Title" -and
+            -not [string]::IsNullOrWhiteSpace($Participant.Heading)) {
+            $HeaderText = [string]$Participant.Heading
+        }
+
         $ItemBrush = New-Object System.Drawing.SolidBrush(
             ([System.Drawing.Color]::FromName([string]$item.Color))
         )
@@ -288,11 +301,11 @@ foreach ($Participant in $Participants)
             [System.Drawing.GraphicsUnit]::Pixel
         )
 
-        $textSize = $Graphics.MeasureString($item.Text, $font)
+        $textSize = $Graphics.MeasureString($HeaderText, $font)
         $textX = ($Bitmap.Width - $textSize.Width) / 2
 
         $Graphics.DrawString(
-            $item.Text,
+            $HeaderText,
             $font,
             $ItemBrush,
             $textX,
@@ -388,7 +401,7 @@ foreach ($Participant in $Participants)
         $Mail.To = $Email
 
         $Mail.Subject =
-            "Aberfeldie Masters Athletics - 1 Hour Track Run Certificate"
+            "Doncaster Masters Athletics - 1 Hour/30 min Track Run/Walk Certificate"
 
         $Mail.HTMLBody = @"
 <p>Dear $Name,</p>
@@ -424,10 +437,10 @@ Aberfeldie Masters Athletics
         # For testing: make changes to GenerateCertificates.ps1 then run.
         # Emails will be saved to the Drafts folder only.
         # To actually send automatically on generation uncomment the following line:
-        #$Mail.Send()
+        $Mail.Send()
 
         # Save the email to the draft folder without sending it
-        $Mail.Save()
+        #$Mail.Save()
 
         Write-Host "Results email saved as draft with certs and pdfs." `
             -ForegroundColor Yellow -BackgroundColor DarkGreen

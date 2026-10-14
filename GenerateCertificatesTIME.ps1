@@ -112,18 +112,31 @@ New-Item -ItemType Directory -Force -Path $ResultsFolder | Out-Null
 
 Write-Host "Loading participants..." -ForegroundColor Cyan
 
-$Participants = Import-Csv $CsvFile
+$CurrentHeading = ""
+$Participants = @(
+    foreach ($ParticipantRow in (Import-ParticipantCsv $CsvFile)) {
+        $RowNumber = [string]$ParticipantRow.No
+        if ($RowNumber.StartsWith('$')) {
+            $CurrentHeading = $RowNumber.Substring(1).Trim()
+            continue
+        }
 
-$Participants = $Participants | Where-Object {
-    -not [string]::IsNullOrWhiteSpace($_.Name)
-}
+        if ([string]::IsNullOrWhiteSpace($ParticipantRow.Name)) {
+            continue
+        }
+
+        $ParticipantRow |
+            Add-Member -NotePropertyName Heading -NotePropertyValue $CurrentHeading -Force
+        $ParticipantRow
+    }
+)
 
 Write-Host "Participants found: $($Participants.Count)"
 
 #
 # Create public results files (without email addresses)
 #
-$OfficialResults = @($Participants | Select-Object No, Name, Distance, Time)
+$OfficialResults = @($Participants | Select-Object No, Heading, Name, Distance, Time)
 $OfficialResults |
     Export-Csv $ResultsCsv -NoTypeInformation -Encoding UTF8
 
@@ -197,6 +210,12 @@ foreach ($Participant in $Participants)
     # Draw header text (defined in CertificateText.ps1)
     #
     foreach ($item in $CertificateText) {
+        $HeaderText = [string]$item.Text
+        if ($item.Name -eq "Title" -and
+            -not [string]::IsNullOrWhiteSpace($Participant.Heading)) {
+            $HeaderText = [string]$Participant.Heading
+        }
+
         $ItemBrush = New-Object System.Drawing.SolidBrush(
             ([System.Drawing.Color]::FromName([string]$item.Color))
         )
@@ -208,11 +227,11 @@ foreach ($Participant in $Participants)
             [System.Drawing.GraphicsUnit]::Pixel
         )
 
-        $textSize = $Graphics.MeasureString($item.Text, $font)
+        $textSize = $Graphics.MeasureString($HeaderText, $font)
         $textX = ($Bitmap.Width - $textSize.Width) / 2
 
         $Graphics.DrawString(
-            $item.Text,
+            $HeaderText,
             $font,
             $ItemBrush,
             $textX,
@@ -306,9 +325,9 @@ foreach ($Participant in $Participants)
         $Mail.SendUsingAccount = $SendAccount
 
         $Mail.To = $Email
-
+        
         $Mail.Subject =
-            "Aberfeldie Masters Athletics - 1 Hour Track Run Time Certificate"
+            "Doncaster Masters Athletics - 1 Hour/30min Track Run/Walk Time Certificate"
 
         $Mail.HTMLBody = @"
 <p>Dear $Name,</p>
@@ -349,9 +368,9 @@ Aberfeldie Masters Athletics
             -ForegroundColor Yellow `
             -BackgroundColor DarkGreen
 
-        #$Mail.Send()
+        $Mail.Send()
 
-        $Mail.Save()
+        #$Mail.Save()
 
         Write-Host "Certificate email saved as draft." `
             -ForegroundColor Yellow `

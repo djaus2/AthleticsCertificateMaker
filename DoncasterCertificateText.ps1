@@ -11,7 +11,7 @@
 #$CertificateTemplateFile = "CertificateTemplateBlank.png"
 $CertificateTemplateFile = "DoncasterCertificateTemplate2.png"
 
-$ParticipantCsvFile = "results.csv"
+$ParticipantCsvFile = "resultsDoncaster.csv"
 $SendUsingAccount = "djaus@sportronics.com.au"
 
 $DefaultTextColor = "Red"

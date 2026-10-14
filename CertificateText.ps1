@@ -12,7 +12,42 @@
 $CertificateTemplateFile = "DoncasterCertificateTemplate2.png"
 
 $ParticipantCsvFile = "results.csv"
+$ParticipantCsvDelimiter = "Auto" # Auto-detect, or force Comma / Tab
 $SendUsingAccount = "djaus@sportronics.com.au"
+
+function Get-ParticipantCsvDelimiter {
+    param([string]$Path)
+
+    switch ($ParticipantCsvDelimiter.ToLowerInvariant()) {
+        "comma" { return ',' }
+        "tab" { return "`t" }
+        "auto" {
+            $HeaderLine = Get-Content -LiteralPath $Path -TotalCount 1 -ErrorAction Stop
+            if ([string]::IsNullOrWhiteSpace($HeaderLine)) {
+                throw "Participant file is empty: $Path"
+            }
+
+            $CommaCount = ([regex]::Matches($HeaderLine, ',')).Count
+            $TabCount = ([regex]::Matches($HeaderLine, "`t")).Count
+
+            if ($CommaCount -eq $TabCount) {
+                throw "Could not detect a comma or tab delimiter in the header of '$Path'."
+            }
+            if ($CommaCount -gt $TabCount) { return ',' }
+            return "`t"
+        }
+        default {
+            throw "Invalid ParticipantCsvDelimiter '$ParticipantCsvDelimiter'. Use Auto, Comma, or Tab."
+        }
+    }
+}
+
+function Import-ParticipantCsv {
+    param([string]$Path)
+
+    $Delimiter = Get-ParticipantCsvDelimiter -Path $Path
+    Import-Csv -LiteralPath $Path -Delimiter $Delimiter
+}
 
 $DefaultTextColor = "Red"
 $DefaultLabelColor = "LightGreen"
@@ -30,7 +65,7 @@ $CertificateText = @(
         Text  = "1 HOUR TRACK RUN"
         Color = $DefaultTextColor
         Font  = "Times New Roman"
-        Size  = 90
+        Size  = 85
         Style = "Bold"
         Y     = 70
     }

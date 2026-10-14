@@ -1,5 +1,10 @@
-"No","Name","Email","Distance","Time"
-"1","Joe Blog","fred@one.com.au","DNS",
-"2","Julie Smith","fred@one.com.au","8730","45:56"
-"4","Fred Nurk","fred@one.com.au","10145",
+"No"	"Name"	"Email"	"Distance"	"Time"
+$1 HOUR TRACK RUN			
+1	Fred Nurk1 	frednurk1@yahoo1.com.au
+$1 HOUR TRACK WALK		
+21	Fred Nurk2 	frednurk2@yahoo1.com.au
+$30 MINUTES RUN			
+31	Fred Nurk3 	frednurk3@yahoo1.com.au	6,5503
+$30 MINUTES WALK
+41	Fred Nurk4 	frednurk4@yahoo1.com.au	3,076
 

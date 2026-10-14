@@ -15,7 +15,7 @@ if (-not (Test-Path $ResultsPdf))
     exit
 }
 
-$Participants = Import-Csv $CsvFile
+$Participants = Import-ParticipantCsv $CsvFile
 
 $Outlook = New-Object -ComObject Outlook.Application
 

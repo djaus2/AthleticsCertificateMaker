@@ -71,7 +71,10 @@ if (Test-Path $CsvFile)
 {
     try
     {
-        $Data = @(Import-Csv $CsvFile -ErrorAction Stop)
+        $Delimiter = Get-ParticipantCsvDelimiter -Path $CsvFile
+        $DelimiterName = if ($Delimiter -eq "`t") { "tab" } else { "comma" }
+        Write-Host "[OK] CSV delimiter: $DelimiterName" -ForegroundColor Green
+        $Data = @(Import-Csv -LiteralPath $CsvFile -Delimiter $Delimiter -ErrorAction Stop)
 
         if ($Data.Count -eq 0)
         {

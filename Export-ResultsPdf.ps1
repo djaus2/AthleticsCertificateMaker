@@ -26,6 +26,7 @@ function Export-ResultsPdf {
 @page { size: A4; margin: 16mm; }
 body { font-family: Arial, sans-serif; font-size: 10pt; color: #111; }
 h1 { font-size: 18pt; margin: 0 0 12pt; }
+h2 { font-size: 13pt; margin: 16pt 0 6pt; }
 table { border-collapse: collapse; width: 100%; }
 th, td { border: 1px solid #888; padding: 6px; text-align: left; }
 th { background: #e8e8e8; }
@@ -33,11 +34,47 @@ th { background: #e8e8e8; }
 '@
 
     try {
-        $Html = $Data |
-            ConvertTo-Html -Property No, Name, Distance, Time `
-                -Title "Official Event Results" `
-                -Head $Style `
-                -PreContent "<h1>Official Event Results</h1>"
+        $ResultGroups = [System.Collections.Generic.List[object]]::new()
+        $CurrentGroup = [System.Collections.Generic.List[object]]::new()
+        $CurrentHeading = $null
+
+        foreach ($Result in $Data) {
+            $Heading = [string]$Result.Heading
+            if ($CurrentGroup.Count -gt 0 -and $Heading -cne $CurrentHeading) {
+                $ResultGroups.Add([pscustomobject]@{
+                    Heading = $CurrentHeading
+                    Results = $CurrentGroup.ToArray()
+                })
+                $CurrentGroup = [System.Collections.Generic.List[object]]::new()
+            }
+
+            if ($CurrentGroup.Count -eq 0) {
+                $CurrentHeading = $Heading
+            }
+            $CurrentGroup.Add($Result)
+        }
+
+        if ($CurrentGroup.Count -gt 0) {
+            $ResultGroups.Add([pscustomobject]@{
+                Heading = $CurrentHeading
+                Results = $CurrentGroup.ToArray()
+            })
+        }
+
+        $HtmlBody = [System.Collections.Generic.List[string]]::new()
+        $HtmlBody.Add("<h1>Official Event Results</h1>")
+        foreach ($Group in $ResultGroups) {
+            if (-not [string]::IsNullOrWhiteSpace($Group.Heading)) {
+                $SafeHeading = [System.Net.WebUtility]::HtmlEncode($Group.Heading)
+                $HtmlBody.Add("<h2>$SafeHeading</h2>")
+            }
+
+            $TableHtml = $Group.Results |
+                ConvertTo-Html -Fragment -Property No, Name, Distance, Time
+            $HtmlBody.Add(($TableHtml -join [Environment]::NewLine))
+        }
+
+        $Html = ConvertTo-Html -Title "Official Event Results" -Head $Style -Body $HtmlBody.ToArray()
         $Html | Set-Content -LiteralPath $HtmlPath -Encoding UTF8
 
         $FullPath = [System.IO.Path]::GetFullPath($Path)
