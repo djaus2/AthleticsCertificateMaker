@@ -59,6 +59,9 @@ $DefaultDataTextSize = 90
 $CertificateSmoothingMode = "HighQuality"
 $CertificateTextRenderingHint = "AntiAliasGridFit"
 
+$ShowLocation = $false
+$ShowHost = $true
+
 $CertificateText = @(
     @{
         Name  = "Title"
@@ -70,21 +73,21 @@ $CertificateText = @(
         Y     = 70
     }
     @{
-        Name  = "SubTitle"
+        Name  = "Location"
         Text  = "Doncaster Athletics Centre"
         Color = "White"
         Font  = "Arial Narrow"
         Size  = 38
         Style = "Regular"
-        Y     = 340
+        Y     = 320
     }
     @{
         Name  = "Host"
-        Text  = ""
-        Color = $DefaultTextColor
-        Font  = "Times New Roman"
+        Text  = "Doncaster Masters Athletics"
+        Color = "White"
+        Font  = "Arial Narrow"
         Size  = 38
-        Style = "Italic"
+        Style = "Regular"
         Y     = 360
     }
     @{

@@ -210,6 +210,13 @@ foreach ($Participant in $Participants)
     # Draw header text (defined in CertificateText.ps1)
     #
     foreach ($item in $CertificateText) {
+        if ($item.Name -eq "Location" -and -not $ShowLocation) {
+            continue
+        }
+        if ($item.Name -eq "Host" -and -not $ShowHost) {
+            continue
+        }
+
         $HeaderText = [string]$item.Text
         if ($item.Name -eq "Title" -and
             -not [string]::IsNullOrWhiteSpace($Participant.Heading)) {

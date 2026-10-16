@@ -98,6 +98,8 @@ $RootFolder = (Get-Location).Path
 # Header text definitions shared by both scripts (title, subtitle, host, date)
 . (Join-Path $PSScriptRoot $CertificateTextDefinitionFile)
 . (Join-Path $PSScriptRoot "Export-ResultsPdf.ps1")
+$CertificateHost = ($CertificateText | Where-Object { $_.Name -eq "Host" }).Text
+$CertificateTitle = ($CertificateText | Where-Object { $_.Name -eq "Title" }).Text
 $CsvFile = Join-Path $RootFolder $ParticipantCsvFile
 $TemplateFile = Join-Path $RootFolder $CertificateTemplateFile
 
@@ -105,7 +107,6 @@ $PngFolder = Join-Path $RootFolder "Output\PNG"
 $ResultsFolder = Join-Path $RootFolder "Results"
 
 $ResultsCsv = Join-Path $ResultsFolder "OfficialResults.csv"
-$ResultsPdf = Join-Path $ResultsFolder "Aberfeldie-1-Hour-Track-Run-Results-2026.pdf"
 
 New-Item -ItemType Directory -Force -Path $PngFolder | Out-Null
 New-Item -ItemType Directory -Force -Path $ResultsFolder | Out-Null
@@ -130,6 +131,22 @@ $Participants = @(
         $ParticipantRow
     }
 )
+
+$ResultHeadings = @(
+    $Participants |
+        ForEach-Object { [string]$_.Heading } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        Select-Object -Unique
+)
+$ResultsTitle = if ($ResultHeadings.Count -eq 1) {
+    $ResultHeadings[0]
+} elseif ($ResultHeadings.Count -gt 1) {
+    "Combined-Event"
+} else {
+    $CertificateTitle
+}
+$SafeResultsTitle = $ResultsTitle -replace '[\\/:*?"<>|]', ''
+$ResultsPdf = Join-Path $ResultsFolder "$SafeResultsTitle-Results-2026.pdf"
 
 Write-Host "Participants found: $($Participants.Count)"
 
@@ -178,6 +195,11 @@ foreach ($Participant in $Participants)
     $Email    = [string]$Participant.Email
     $Distance = [string]$Participant.Distance
     $Time     = [string]$Participant.Time
+    $EmailTitle = if (-not [string]::IsNullOrWhiteSpace($Participant.Heading)) {
+        [string]$Participant.Heading
+    } else {
+        $CertificateTitle
+    }
 
 
     #
@@ -216,7 +238,7 @@ foreach ($Participant in $Participants)
             $Mail.To = $Email
 
             $Mail.Subject =
-                "Aberfeldie Masters Athletics - 1 Hour Track Run Certificate"
+                "$CertificateHost - $EmailTitle Certificate"
 
             $Mail.HTMLBody = @"
     <p>Dear $Name,</p>
@@ -237,7 +259,7 @@ foreach ($Participant in $Participants)
 
     <p>
     Regards<br/>
-    Aberfeldie Masters Athletics
+    Doncaster Masters Athletics
     </p>
 "@
 
@@ -252,7 +274,7 @@ foreach ($Participant in $Participants)
             Write-Host "Sending results email..." `
                 -ForegroundColor DarkGreen  -BackgroundColor Yellow
 
-            $Mail.Send()
+            $Mail.Save()
 
             Write-Host "Results email sent." `
                 -ForegroundColor DarkGreen  -BackgroundColor Yellow
@@ -284,6 +306,13 @@ foreach ($Participant in $Participants)
     # Draw header text (defined in CertificateText.ps1)
     #
     foreach ($item in $CertificateText) {
+        if ($item.Name -eq "Location" -and -not $ShowLocation) {
+            continue
+        }
+        if ($item.Name -eq "Host" -and -not $ShowHost) {
+            continue
+        }
+
         $HeaderText = [string]$item.Text
         if ($item.Name -eq "Title" -and
             -not [string]::IsNullOrWhiteSpace($Participant.Heading)) {
@@ -401,7 +430,7 @@ foreach ($Participant in $Participants)
         $Mail.To = $Email
 
         $Mail.Subject =
-            "Doncaster Masters Athletics - 1 Hour/30 min Track Run/Walk Certificate"
+            "$CertificateHost - $EmailTitle Certificate"
 
         $Mail.HTMLBody = @"
 <p>Dear $Name,</p>
@@ -422,7 +451,7 @@ Recorded distance:
 
 <p>
 Regards<br/>
-Aberfeldie Masters Athletics
+Doncaster Masters Athletics
 </p>
 "@
 
@@ -437,10 +466,10 @@ Aberfeldie Masters Athletics
         # For testing: make changes to GenerateCertificates.ps1 then run.
         # Emails will be saved to the Drafts folder only.
         # To actually send automatically on generation uncomment the following line:
-        $Mail.Send()
+        #$Mail.Send()
 
         # Save the email to the draft folder without sending it
-        #$Mail.Save()
+        $Mail.Save()
 
         Write-Host "Results email saved as draft with certs and pdfs." `
             -ForegroundColor Yellow -BackgroundColor DarkGreen
