@@ -20,3 +20,7 @@ aResultsentrants-aberfeldie-one-hour-track-challenge.xlsx
 /Results/OfficialResults.csv
 /DoncasterCertificateTemplate.png
 /donresults,csv
+/Results
+*.csv
+/results_Doncaster
+/results_DoncasterFrank
