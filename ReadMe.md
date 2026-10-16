@@ -8,7 +8,13 @@
 
 
 > **New:** csv entry of 
-results. Removes need for Excel and active printer!
+results.  
+Removes need for Excel and active printer!  
+Filename: `results.csv'
+Can also be tabbed separated (same filename);
+
+> **Also New:**: Can add event name in results a line starting with $  
+Can have multiple events thus.
 
 > Certificate text fonts, colors, sizes, and positions are configurable.
 
