@@ -1,4 +1,4 @@
-$CertificateTextDefinitionFile = "CertificateText.ps1"
+$CertificateTextDefinitionFile = "Import-CertificateTextFromJson.ps1"
 
 Add-Type -AssemblyName System.Drawing
 
