@@ -37,6 +37,8 @@ Can have multiple events thus.
 
 `CertificateText.ps1` now controls the fonts, colors, sizes, and vertical positions of the header text and participant labels and values. Both certificate scripts use this shared configuration.
 
+> Morphing to using a json file for settings and app to vreate or modify settings.
+
 ## Previous Updates:
 Moved the following to CertificateText.ps1 from the generate scripts.
 
