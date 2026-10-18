@@ -1,3 +1,9 @@
+# Import-CertificateTextFromJson sets them up by reading in CerificateText.json and creating the variables in the global scope. 
+#   - That script then uses these variables to generate certificates and send emails.
+# Should be seamless as to which is used.
+# With the json approach, simpler to create an app to edit or create configuration. (Coming)
+#
+#$CertificateTextDefinitionFile = "CertificateText.ps1"
 $CertificateTextDefinitionFile = "Import-CertificateTextFromJson.ps1"
 
 Add-Type -AssemblyName System.Drawing
