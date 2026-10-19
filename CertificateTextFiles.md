@@ -10,14 +10,16 @@ This document describes the three new files added to the repository that provide
   - Contains `CertificateText` (array of text items: Title, Location, Host, Date) and `CertificateFields` (object with `Standard` and `Time` arrays describing label/value fields).
   - Edit this file to change wording, fonts, colours, positions and field layout.
 
-- `Generate-CertificateTextFromJson.ps1`
+- `Prev/Generate-CertificateTextFromJson.ps1`
   - Generates a PowerShell file (default: `CertificateText.ps1`) from `CertificateText.json`.
   - Serialises scalars and collections into PowerShell literal syntax and emits the CSV helper functions used by the generator scripts (`Get-ParticipantCsvDelimiter`, `Import-ParticipantCsv`).
   - Usage:
 	```powershell
+	Set-Location .\Prev
 	.\Generate-CertificateTextFromJson.ps1 -JsonPath .\CertificateText.json -OutputPath .\CertificateText.ps1
 	```
   - Use this when you want a generated PS1 file for backward compatibility with scripts that dot-source `CertificateText.ps1`.
+  - From `Prev`, running `.\Generate-CertificateTextFromJson.ps1` uses the local JSON copy and writes `CertificateText.ps1` in that folder. Strings are emitted as literal values, preserving quotes, dollar signs and backticks.
 
 - `Import-CertificateTextFromJson.ps1`
   - Loads `CertificateText.json` directly into the current PowerShell session so existing generator scripts can reference the variables without creating a PS1 file.
@@ -41,7 +43,7 @@ This document describes the three new files added to the repository that provide
 
 - Or keep the current flow by generating a PS1 first and then dot-sourcing it:
   ```powershell
-  .\Generate-CertificateTextFromJson.ps1 -JsonPath .\CertificateText.json -OutputPath .\CertificateText.ps1
+  .\Prev\Generate-CertificateTextFromJson.ps1 -JsonPath .\CertificateText.json -OutputPath .\CertificateText.ps1
   . .\CertificateText.ps1
   ```
 
