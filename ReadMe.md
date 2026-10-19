@@ -4,8 +4,7 @@
 >
 > Sample certificate:
 >
-> [004-Fred Nurk.png](<https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png>)
->
+> [004-Fred Nurk.png](<https://github.com/djaus2/AthleticsCertificateMaker/blob/main/Output/PNG/004-Fred%20Nurk.png>
 > **New:** csv entry of
 results.  
 Removes need for Excel and active printer!  
@@ -19,6 +18,10 @@ Can have multiple events thus.
 >
 > Generate scripts are now json driven and are to generate certificates for events.  
 > CertificateText.ps1 is now in `Prev subfolder along with a script for generating it from the json version.
+>
+> Big Change: Certificate metainfo now defined in a json file,  
+> There is now a separate project with 3 apps for generating and editing that file.  
+[djaus2/AthsCertificateEditors](https://github.com/djaus2/AthsCertificateEditors)
 
 ## Blog posts
 
